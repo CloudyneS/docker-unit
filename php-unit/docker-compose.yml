@@ -1,0 +1,46 @@
+version: "3.2"
+services:
+  php74-unit:
+    image: ghcr.io/cloudynes/php-unit:7.4
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SOURCE_VERSION: 7.4
+    volumes:
+      - ./config.json:/docker-entrypoint.d/config.json
+    ports:
+      - 8080:8080
+  php80-unit:
+    image: ghcr.io/cloudynes/php-unit:8.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SOURCE_VERSION: 8.0
+    volumes:
+      - ./config.json:/docker-entrypoint.d/config.json
+    ports:
+      - 8080:8080
+  php81-unit:
+    image: ghcr.io/cloudynes/php-unit:8.1
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SOURCE_VERSION: 8.1
+    volumes:
+      - ./config.json:/docker-entrypoint.d/config.json
+    ports:
+      - 8080:8080
+  php82-unit:
+    image: ghcr.io/cloudynes/php-unit:8.2
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SOURCE_VERSION: 8.2
+    volumes:
+      - ./config.json:/docker-entrypoint.d/config.json
+    ports:
+      - 8080:8080

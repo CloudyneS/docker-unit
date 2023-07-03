@@ -1,0 +1,29 @@
+services:
+  php74:
+    image: ghcr.io/cloudynes/php-extended:7.4
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SOURCE_VERSION: 7.4
+  php80:
+    image: ghcr.io/cloudynes/php-extended:8.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SOURCE_VERSION: 8.0
+  php81:
+    image: ghcr.io/cloudynes/php-extended:8.1
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SOURCE_VERSION: 8.1
+  php82:
+    image: ghcr.io/cloudynes/php-extended:8.2
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SOURCE_VERSION: 8.2

@@ -1,0 +1,104 @@
+{
+    "settings": {
+        "http": {
+            "header_read_timeout": 60,
+            "body_read_timeout": 60,
+            "idle_timeout": 60,
+            "max_body_size": 512111110
+        }
+    },
+    "listeners": {
+        "*:8080": {
+            "pass": "routes"
+        }
+    },
+    "routes": [
+        {
+            "action": {
+                "return": 200
+            },
+            "match": {
+                "uri": [
+                    "/unit-ping",
+                    "/fpm-ping"
+                ]
+            }
+        },
+        {
+            "action": {
+                "return": 404
+            },
+            "match": {
+                "uri": [
+                    "/app/uploads/*.php",
+                    "/app/uploads/*.php/*"
+                ]
+            }
+        },
+        {
+            "action": {
+                "pass": "applications/php/direct"
+            },
+            "match": {
+                "uri": [
+                    "*.php",
+                    "*.php/*",
+                    "/wp/wp-admin/"
+                ]
+            }
+        },
+        {
+            "action": {
+                "return": 302,
+                "location": "/wp/wp-admin"
+            },
+            "match": {
+                "uri": [
+                    "/wp-admin",
+                    "/wp-admin/*"
+                ]
+            }
+        },
+        {
+            "action": {
+                "share": "/app/web$uri",
+                "fallback": {
+                    "pass": "applications/php/index"
+                }
+            }
+        }
+    ],
+
+    "applications": {
+        "php": {
+            "type": "php",
+            "options": {
+                "user": {
+                    "display_errors": "0",
+                    "log_errors": "1"
+                },
+                "admin": {
+                        "expose_php": "Off",
+                        "short_open_tag": "Off",
+                        "disable_functions": "exec,passthru,shell_exec,system,proc_open,popen,show_source",
+                        "log_errors": "On",
+                        "date.timezone": "Europe/Stockholm",
+                        "max_execution_time": "300",
+                        "max_input_time": "300",
+                        "memory_limit": "512M",
+                        "post_max_size": "512M",
+                        "upload_max_filesize": "512M"
+                }
+            },
+            "targets": {
+                "direct": {
+                    "root": "/app/web"
+                },
+                "index": {
+                    "root": "/app/web",
+                    "script": "index.php"
+                }
+            }
+        }
+    }
+}

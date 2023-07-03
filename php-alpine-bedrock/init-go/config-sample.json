@@ -1,0 +1,13 @@
+{
+    "exitOnError": true,
+    "webserverUser": "unit",
+    "webserverGroup": "unit",
+    "applicationDir": "/app",
+    "permissions": "0770",
+    "importDatabase": false,
+    "databasePath": "/full-cloud/import.sql",
+    "overwriteDatabase": false,
+    "updatePermissions": true,
+    "generateSalts": true,
+    "activateTheme": "twentytwentythree"
+}
