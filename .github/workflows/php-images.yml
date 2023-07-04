@@ -27,7 +27,7 @@ on:
                     - "8.2"
 jobs:
     build:
-        if: (github.event.inputs.container_base == 'alpine' && github.event.inputs.container_image != 'php-extended') || github.events.inputs.container_base == 'debian' 
+        if: (github.event.inputs.container_base == 'alpine' && github.event.inputs.container_image != 'php-extended') || github.event.inputs.container_base == 'debian' 
         runs-on: ubuntu-latest
         steps:
           - name: Checkout
@@ -60,17 +60,17 @@ jobs:
               username: ${{ secrets.AZURECR_USER }}
               password: ${{ secrets.AZURECR_SECRET }}
 
-          - name: Build and push ${{ github.events.inputs.container_image }}:${{ github.events.inputs.php_version }}-${{ github.events.inputs.container_base }}
+          - name: Build and push ${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
             uses: docker/build-push-action@v2
             with:
-                cache-from: type=registry,ref=ghcr.io/cloudynes/${{ github.events.inputs.container_image }}:cache-${{ github.events.inputs.php_version }}
-                cache-to: type=registry,ref=ghcr.io/cloudynes/${{ github.events.inputs.container_image }}:cache-${{ github.events.inputs.php_version }}
-                context: ./${{ github.events.inputs.container_base }}/${{ github.events.inputs.container_image }}
-                file: ./${{ github.events.inputs.container_base }}/${{ github.events.inputs.container_image }}/Dockerfile
+                cache-from: type=registry,ref=ghcr.io/cloudynes/${{ github.event.inputs.container_image }}:cache-${{ github.event.inputs.php_version }}
+                cache-to: type=registry,ref=ghcr.io/cloudynes/${{ github.event.inputs.container_image }}:cache-${{ github.event.inputs.php_version }}
+                context: ./${{ github.event.inputs.container_base }}/${{ github.event.inputs.container_image }}
+                file: ./${{ github.event.inputs.container_base }}/${{ github.event.inputs.container_image }}/Dockerfile
                 push: true
                 build-args: |
-                    SOURCE_VERSION=${{ github.events.inputs.php_version }}
+                    SOURCE_VERSION=${{ github.event.inputs.php_version }}
                 tags: |
-                    ghcr.io/cloudynes/${{ github.events.inputs.container_image }}:${{ github.events.inputs.php_version }}-${{ github.events.inputs.container_base }}
-                    cloudyne/${{ github.events.inputs.container_image }}:${{ github.events.inputs.php_version }}-${{ github.events.inputs.container_base }}
-                    cloudyne.azurecr.io/${{ github.events.inputs.container_image }}:${{ github.events.inputs.php_version }}-${{ github.events.inputs.container_base }}
+                    ghcr.io/cloudynes/${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
+                    cloudyne/${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
+                    cloudyne.azurecr.io/${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
