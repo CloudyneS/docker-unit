@@ -1,5 +1,5 @@
-ARG SOURCE_VERSION=8.2
-FROM ghcr.io/cloudynes/php-extended:${SOURCE_VERSION} as BUILDER
+ARG SOURCE_VERSION=8.0
+FROM ghcr.io/cloudynes/php-extended:${SOURCE_VERSION}-alpine as BUILDER
 
 LABEL Version="1.0"
 LABEL Maintainer="Cloudyne Systems"
@@ -9,14 +9,18 @@ LABEL org.opencontainers.image.description="PHP and Nginx Unit container for Kub
 LABEL org.opencontainers.image.licenses="MIT"
 
 RUN set -ex \
-    && apt-get update \
-    && apt-get install --no-install-recommends --no-install-suggests -y ca-certificates mercurial build-essential libssl-dev libpcre2-dev \
+    && apk add --no-cache \
+        mercurial \
+        alpine-sdk \
+        openssl-dev \
+        pcre2-dev \
+        dpkg dpkg-dev \
     && mkdir -p /usr/lib/unit/modules /usr/lib/unit/debug-modules \
     && hg clone https://hg.nginx.org/unit \
     && cd unit \
     && hg up 1.30.0-1 \
     && NCPU="$(getconf _NPROCESSORS_ONLN)" \
-    && DEB_HOST_MULTIARCH="$(dpkg-architecture -q DEB_HOST_MULTIARCH)" \
+    && DEB_HOST_MULTIARCH="x86_64-linux-gnu" \
     && CC_OPT="$(DEB_BUILD_MAINT_OPTIONS="hardening=+all,-pie" DEB_CFLAGS_MAINT_APPEND="-Wp,-D_FORTIFY_SOURCE=2 -fPIC" dpkg-buildflags --get CFLAGS)" \
     && LD_OPT="$(DEB_BUILD_MAINT_OPTIONS="hardening=+all,-pie" DEB_LDFLAGS_MAINT_APPEND="-Wl,--as-needed -pie" dpkg-buildflags --get LDFLAGS)" \
     && CONFIGURE_ARGS_MODULES="--prefix=/usr \
@@ -48,16 +52,16 @@ RUN set -ex \
     && ./configure $CONFIGURE_ARGS_MODULES --cc-opt="$CC_OPT" --modules=/usr/lib/unit/modules \
     && ./configure php \
     && make -j $NCPU php-install \
-    && ldd /usr/sbin/unitd | awk '/=>/{print $(NF-1)}' | while read n; do dpkg-query -S $n; done | sed 's/^\([^:]\+\):.*$/\1/' | sort | uniq > /requirements.apt
+    && ldd /usr/sbin/unitd | awk '/=>/{print $(NF-1)}' | while read n; do apk -q info --who-owns $n; done | sed 's/.*owned by //' | sort | uniq > /requirements.apk
 
-FROM ghcr.io/cloudynes/php-extended:${SOURCE_VERSION}
+FROM ghcr.io/cloudynes/php-alpine-extended:${SOURCE_VERSION}-debian
 COPY docker-entrypoint.sh /usr/local/bin/
 COPY --from=BUILDER /usr/sbin/unitd /usr/sbin/unitd
 COPY --from=BUILDER /usr/sbin/unitd-debug /usr/sbin/unitd-debug
 COPY --from=BUILDER /usr/lib/unit/ /usr/lib/unit/
-COPY --from=BUILDER /requirements.apt /requirements.apt
+COPY --from=BUILDER /requirements.apk /requirements.apk
 
-RUN ldconfig
+RUN ldconfig /
 
 RUN set -x \
     && if [ -f "/tmp/libunit.a" ]; then \
@@ -69,17 +73,14 @@ RUN set -x \
     && addgroup --system unit \
     && adduser \
         --system \
-        --disabled-login \
         --ingroup unit \
         --no-create-home \
         --home /nonexistent \
         --gecos "unit user" \
         --shell /bin/false \
         unit \
-    && apt update \
-    && apt --no-install-recommends --no-install-suggests -y install curl $(cat /requirements.apt) \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* \
-    && rm -f /requirements.apt \
+    && apk add --no-cache $(cat /requirements.apk) \
+    && rm -f /requirements.apk \
     && ln -sf /dev/stdout /var/log/unit.log && \
     mkdir -p /var/lib/unit && chown -R unit:unit /var/run /run /var/lib/unit
 

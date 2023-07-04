@@ -1,5 +1,4 @@
 ARG SOURCE_VERSION
-# FROM ghcr.io/cloudynes/php-unit:${SOURCE_VERSION} AS BEDROCK
 FROM golang:1.18-buster as INIT
 
 LABEL Version="1.0"
@@ -9,25 +8,13 @@ LABEL Description="Container for Roots Bedrock based on extended PHP image with 
 LABEL org.opencontainers.image.description="Container for Roots Bedrock based on extended PHP image with Nginx Unit"
 LABEL org.opencontainers.image.licenses="MIT"
 
-# Set the working directory and installation user
-# USER root
-
-# WORKDIR /app
-
-# Install GIT and Composer
-# RUN apt-get update && apt-get -y install git && apt-get clean \ 
-#     && chown -R unit:unit /app \
-#     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
-#     && composer create-project --no-interaction --no-dev roots/bedrock .
-
-
 USER root
 WORKDIR /init-go
 ADD init-go /init-go
 
 RUN go build -o init-go main.go
 
-FROM ghcr.io/cloudynes/php-alpine-unit:${SOURCE_VERSION}
+FROM ghcr.io/cloudynes/php-unit:${SOURCE_VERSION}-alpine
 
 USER root
 WORKDIR /app
