@@ -1,3 +1,4 @@
+ARG SOURCE_VERSION
 FROM ghcr.io/cloudynes/php-unit:${SOURCE_VERSION}-alpine AS BUILDER
 
 WORKDIR /app
@@ -10,6 +11,7 @@ RUN apk add --no-cache git unzip \
     && chmod ug+w -R /app/storage /app/bootstrap/cache /app/public/uploads \
     && rm -rf /app/.git
 
+ARG SOURCE_VERSION
 FROM ghcr.io/cloudynes/php-unit:${SOURCE_VERSION}-alpine
 
 USER root
