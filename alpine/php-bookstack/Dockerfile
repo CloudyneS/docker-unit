@@ -22,7 +22,7 @@ WORKDIR /app
 
 COPY --chown=unit:unit --from=BUILDER /app /app
 COPY --chown=root:root --from=BUILDER "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
-COPY --chown=unit:unit ./unit.conf.json /docker-entrypoint.d/unit.json
+COPY --chown=unit:unit ./unit.config.json /docker-entrypoint.d/unit.json
 COPY --chown=unit:unit ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 ENV LOG_CHANNEL='stdout'
