@@ -54,7 +54,7 @@ RUN set -ex \
     && make -j $NCPU php-install \
     && ldd /usr/sbin/unitd | awk '/=>/{print $(NF-1)}' | while read n; do apk -q info --who-owns $n; done | sed 's/.*owned by //' | sort | uniq > /requirements.apk
 
-FROM ghcr.io/cloudynes/php-alpine-extended:${SOURCE_VERSION}-debian
+FROM ghcr.io/cloudynes/php-extended:${SOURCE_VERSION}-alpine
 COPY docker-entrypoint.sh /usr/local/bin/
 COPY --from=BUILDER /usr/sbin/unitd /usr/sbin/unitd
 COPY --from=BUILDER /usr/sbin/unitd-debug /usr/sbin/unitd-debug
