@@ -4,12 +4,14 @@ FROM ghcr.io/cloudynes/php-unit:${SOURCE_VERSION}-alpine AS BUILDER
 WORKDIR /app
 
 USER root
-RUN apk add --no-cache git unzip
+RUN apk add --no-cache git unzip \
+    && mkdir -p /etc/composer \
+    && chown -R unit:unit /etc/composer \
+    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
 USER unit
 
-RUN mkdir -p /etc/composer \
-    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
-    && git clone https://github.com/BookStackApp/BookStack.git /app --branch release --single-branch \
+RUN git clone https://github.com/BookStackApp/BookStack.git /app --branch release --single-branch \
     && composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-progress \
     && chmod ug+w -R /app/storage /app/bootstrap/cache /app/public/uploads \
     && rm -rf /app/.git
