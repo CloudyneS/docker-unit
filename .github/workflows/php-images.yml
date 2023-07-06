@@ -26,6 +26,74 @@ on:
                     - "8.1"
                     - "8.2"
 jobs:
+    build-alpine-extended:
+        if: github.event.inputs.container_base == 'alpine' && github.event.inputs.container_image == 'php-extended'
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout
+            uses: actions/checkout@v2
+
+          - name: Set up QEMU
+            uses: docker/setup-qemu-action@v2
+          
+          - name: Set up Docker Buildx
+            uses: docker/setup-buildx-action@v2
+          
+          - name: Login to GHCR
+            uses: docker/login-action@v2
+            with:
+              registry: ghcr.io
+              username: cloudynes
+              password: ${{ secrets.GITHUB_TOKEN }}
+    
+          - name: Login to Docker Hub
+            uses: docker/login-action@v2
+            with:
+              registry: docker.io
+              username: ${{ secrets.DOCKERHUB_USERNAME }}
+              password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
+          - name: Login to Azure Container Registry
+            uses: docker/login-action@v2
+            with:
+              registry: ${{ secrets.AZURECR_URL }}
+              username: ${{ secrets.AZURECR_USER }}
+              password: ${{ secrets.AZURECR_SECRET }}
+          
+          - name: Prepare Dockerfiles
+            run: |
+              cd alpine/php-extended
+              bash make-dockerfiles.sh
+              cd ..
+          
+          - name: Build image (PHP8.0)
+            if: github.event.inputs.php_version == '8.0'
+            uses: docker/build-push-action@v2
+            with:
+                cache-from: type=registry,ref=ghcr.io/cloudynes/${{ github.event.inputs.container_image }}:cache-${{ github.event.inputs.php_version }}
+                cache-to: type=registry,ref=ghcr.io/cloudynes/${{ github.event.inputs.container_image }}:cache-${{ github.event.inputs.php_version }}
+                context: ./${{ github.event.inputs.container_base }}/${{ github.event.inputs.container_image }}/php-alpine-original/8.0/alpine3.16/cli
+                file: ./${{ github.event.inputs.container_base }}/${{ github.event.inputs.container_image }}/php-alpine-original/8.0/alpine3.16/cli/Dockerfile
+                push: true
+                tags: |
+                    ghcr.io/cloudynes/${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
+                    cloudyne/${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
+                    cloudyne.azurecr.io/${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
+          
+          - name: Build image (PHP8.1)
+            if: github.event.inputs.php_version == '8.1'
+            uses: docker/build-push-action@v2
+            with:
+              cache-from: type=registry,ref=ghcr.io/cloudynes/${{ github.event.inputs.container_image }}:cache-${{ github.event.inputs.php_version }}
+              cache-to: type=registry,ref=ghcr.io/cloudynes/${{ github.event.inputs.container_image }}:cache-${{ github.event.inputs.php_version }}
+              context: ./${{ github.event.inputs.container_base }}/${{ github.event.inputs.container_image }}/php-alpine-original/8.1/alpine3.18/cli
+              file: ./${{ github.event.inputs.container_base }}/${{ github.event.inputs.container_image }}/php-alpine-original/8.1/alpine3.18/cli/Dockerfile
+              push: true
+              tags: |
+                  ghcr.io/cloudynes/${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
+                  cloudyne/${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
+                  cloudyne.azurecr.io/${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
+
     build:
         if: (github.event.inputs.container_base == 'alpine' && github.event.inputs.container_image != 'php-extended') || github.event.inputs.container_base == 'debian' 
         runs-on: ubuntu-latest

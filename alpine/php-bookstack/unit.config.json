@@ -1,0 +1,49 @@
+{
+    "listeners": {
+        "*:8123": {
+            "pass": "routes"
+        }
+
+    },
+    "routes": [
+        {
+            "action": {
+                "return": 200
+            },
+            "match": {
+                "uri": [
+                    "/unit-ping",
+                    "/fpm-ping"
+                ]
+            }
+        },
+       {
+            "action": {
+                "share": "/app/public$uri",
+                "fallback": {
+                    "pass": "applications/bookstack"
+                }
+            }
+        }
+    ],
+    "applications": {
+        "bookstack": {
+            "type": "php",
+            "processes": 5,
+            "options": {
+                "user": {
+                    "display_errors": "Off",
+                    "log_errors": "On",
+                    "error_log": "/proc/self/fd/2"
+                },
+                "admin": {
+                    "expose_php": "Off",
+                    "log_errors": "On",
+                    "error_log": "/proc/self/fd/2"
+                }
+            },
+            "root": "/app/public",
+            "script": "index.php"
+        }
+    }
+}
