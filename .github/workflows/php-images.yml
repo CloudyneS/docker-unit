@@ -140,7 +140,7 @@ jobs:
             push: true
             build-args:
               SOURCE_VERSION=${{ github.event.inputs.php_version }}
-            tags:
+            tags: |
               ghcr.io/cloudynes/php-extended:${{ github.event.inputs.php_version }}-debian
               cloudyne/php-extended:${{ github.event.inputs.php_version }}-debian
               cloudyne.azurecr.io/php-extended:${{ github.event.inputs.php_version }}-debian
@@ -153,7 +153,7 @@ jobs:
             push: true
             build-args:
               SOURCE_VERSION=${{ github.event.inputs.php_version }}
-            tags:
+            tags: |
               ghcr.io/cloudynes/php-unit:${{ github.event.inputs.php_version }}-debian
               cloudyne/php-unit:${{ github.event.inputs.php_version }}-debian
               cloudyne.azurecr.io/php-unit:${{ github.event.inputs.php_version }}-debian
@@ -166,7 +166,7 @@ jobs:
             push: true
             build-args:
               SOURCE_VERSION=${{ github.event.inputs.php_version }}
-            tags:
+            tags: |
               ghcr.io/cloudynes/php-bedrock:${{ github.event.inputs.php_version }}-debian
               cloudyne/php-bedrock:${{ github.event.inputs.php_version }}-debian
               cloudyne.azurecr.io/php-bedrock:${{ github.event.inputs.php_version }}-debian
