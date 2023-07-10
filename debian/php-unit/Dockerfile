@@ -66,7 +66,7 @@ RUN set -x \
     fi \
     && mkdir -p /var/lib/unit/ \
     && mkdir /docker-entrypoint.d/ \
-    && addgroup --system unit \
+    && addgroup --system --gid 101 unit \
     && adduser \
         --system \
         --disabled-login \
@@ -75,6 +75,7 @@ RUN set -x \
         --home /nonexistent \
         --gecos "unit user" \
         --shell /bin/false \
+        --uid 101 \
         unit \
     && apt update \
     && apt --no-install-recommends --no-install-suggests -y install curl $(cat /requirements.apt) \
