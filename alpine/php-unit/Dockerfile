@@ -70,7 +70,7 @@ RUN set -x \
     fi \
     && mkdir -p /var/lib/unit/ \
     && mkdir /docker-entrypoint.d/ \
-    && addgroup --system unit \
+    && addgroup --system --gid 101 unit \
     && adduser \
         --system \
         --ingroup unit \
@@ -78,6 +78,7 @@ RUN set -x \
         --home /nonexistent \
         --gecos "unit user" \
         --shell /bin/false \
+        --uid 101 \
         unit \
     && apk add --no-cache $(cat /requirements.apk) \
     && rm -f /requirements.apk \
