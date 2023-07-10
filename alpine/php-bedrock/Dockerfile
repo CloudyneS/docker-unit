@@ -1,5 +1,5 @@
 ARG SOURCE_VERSION
-FROM golang:1.18-buster as INIT
+FROM golang:1.18-alpine3.16 as INIT
 
 LABEL Version="1.0"
 LABEL Maintainer="Cloudyne Systems"
