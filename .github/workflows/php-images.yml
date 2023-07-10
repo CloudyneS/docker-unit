@@ -173,7 +173,7 @@ jobs:
     
 
     build:
-        if: ! (github.event.inputs.build_all) && (github.event.inputs.container_base == 'debian' || (github.event.inputs.container_base == 'alpine' && github.event.inputs.container_image != 'php-extended'))
+        if: !github.event.inputs.build_all && (github.event.inputs.container_base == 'debian' || (github.event.inputs.container_base == 'alpine' && github.event.inputs.container_image != 'php-extended'))
         runs-on: ubuntu-latest
         steps:
           - name: Checkout
