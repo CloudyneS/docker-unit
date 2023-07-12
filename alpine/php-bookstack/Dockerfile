@@ -19,15 +19,16 @@ RUN git clone https://github.com/BookStackApp/BookStack.git /app --branch releas
 ARG SOURCE_VERSION
 FROM ghcr.io/cloudynes/php-unit:${SOURCE_VERSION}-alpine
 
+COPY --chown=unit:unit --from=BUILDER /app /app
+COPY --chown=root:root --from=BUILDER "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+COPY --chown=unit:unit ./unit.config.json /docker-entrypoint.d/unit.json
+COPY ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
 USER root
-RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
+    && chmod +x /usr/local/bin/docker-entrypoint.sh
 USER unit
 
 WORKDIR /app
 
-COPY --chown=unit:unit --from=BUILDER /app /app
-COPY --chown=root:root --from=BUILDER "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
-COPY --chown=unit:unit ./unit.config.json /docker-entrypoint.d/unit.json
-COPY --chown=unit:unit ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-
-ENV LOG_CHANNEL='stdout'
+ENV LOG_CHANNEL='stderr'
