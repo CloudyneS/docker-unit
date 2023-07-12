@@ -30,9 +30,6 @@
         "bookstack": {
             "type": "php",
             "processes": 5,
-            "environment": {
-                "OIDC_ISSUER_DISCOVERY": true
-            },
             "options": {
                 "user": {
                     "display_errors": "Off",

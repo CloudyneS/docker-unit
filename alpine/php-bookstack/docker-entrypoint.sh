@@ -57,11 +57,22 @@ if [ "$1" = "unitd" ] || [ "$1" = "unitd-debug" ]; then
                 echo "$0: Ignoring $f";
             done
 
+            echo "$0: Checking if configuration exists..."
+            if [ ! -f /app/.env ]; then
+                echo "$0: Copying default configuration..."
+                cp /app/.env.example /app/.env
+            fi
+
+            echo "$0: Checking if OIDC_ISSUER_DISCOVERY is set..."
+            if [ ! -z "$OIDC_ISSUER_DISCOVERY" ] && [ "$OIDC_ISSUER_DISCOVERY" !-ne "false" ]; then
+                echo "OIDC_ISSUER_DISCOVERY=true" >> /app/.env
+            fi
+
             echo "$0: Generating a new application key for Laravel..."
             # Create .env with APP_KEY= if it doesn't exist
             # and if the environment APP_KEY isn't set
-            if [ ! -f /app/.env ] && [ -z "$APP_KEY" ]; then
-                echo "APP_KEY=" > .env
+            if  [ -z "$APP_KEY" ]; then
+                echo "APP_KEY=" >> .env
                 php artisan key:generate --force
                 echo "$0: Application key generated."
             fi
