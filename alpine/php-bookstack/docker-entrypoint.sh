@@ -59,12 +59,10 @@ if [ "$1" = "unitd" ] || [ "$1" = "unitd-debug" ]; then
 
             echo "$0: Checking if configuration exists..."
             if [ ! -f /app/.env ]; then
-                echo "$0: Copying default configuration..."
-                cp /app/.env.example /app/.env
+                echo "$0: Creating empty configuration..."
+                touch /app/.env
             fi
-            
-            echo "OIDC_ISSUER_DISCOVERY=true" >> /app/.env
-            
+           
             echo "$0: Generating a new application key for Laravel..."
             # Create .env with APP_KEY= if it doesn't exist
             # and if the environment APP_KEY isn't set

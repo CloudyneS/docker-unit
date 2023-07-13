@@ -14,7 +14,10 @@ USER unit
 RUN git clone https://github.com/BookStackApp/BookStack.git /app --branch release --single-branch \
     && composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-progress \
     && chmod ug+w -R /app/storage /app/bootstrap/cache /app/public/uploads \
-    && rm -rf /app/.git
+    && rm -rf /app/.git \
+    && mkdir -p /app/storage/logs /app/storage/framework/logs \
+    && ln -sf /dev/stdout /app/storage/logs/laravel.log \
+    && ln -sf /dev/stdout /app/storage/framework/logs/laravel.log
 
 ARG SOURCE_VERSION
 FROM ghcr.io/cloudynes/php-unit:${SOURCE_VERSION}-alpine
