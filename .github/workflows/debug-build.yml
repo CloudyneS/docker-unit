@@ -33,7 +33,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
             context: ./alpine/debug-build
-            file: ./alpine/debug-build
+            file: ./alpine/debug-build/Dockerfile
             push: true
             build-args: |
               SOURCE_IMAGE="${{ github.event.inputs.image_name }}"
