@@ -34,4 +34,4 @@ USER unit
 
 WORKDIR /app
 
-ENV LOG_CHANNEL='stderr'
+ENV LOG_CHANNEL='single'
