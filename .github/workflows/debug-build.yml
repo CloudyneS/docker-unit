@@ -37,6 +37,6 @@ jobs:
             push: true
             build-args: |
               SOURCE_IMAGE=ghcr.io/cloudynes/${{ github.event.inputs.image_name }}
-              DEBUG_PACKAGES="${{ github.event.inputs.debug_packages }}"
+              DEBUG_PACKAGES=${{ github.event.inputs.debug_packages }}
             tags: |
                 ghcr.io/cloudynes/${{ github.event.inputs.image_name }}-debug
