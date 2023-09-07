@@ -39,7 +39,7 @@ RUN apk add --no-cache git unzip mariadb-client && \
     chmod +x /usr/local/bin/wp && \
     /usr/local/bin/wp --allow-root package install aaemnnosttv/wp-cli-dotenv-command && \
     composer create-project roots/bedrock --no-interaction --no-dev . && \
-    touch /app/.env && \
+    cp /app/.env.example /app/.env && \
     chown -R unit:unit /etc/wpcli /etc/composer /app /var/lib/unit /var/run && \
     rm -rf /var/lib/apt/lists/* /tmp/* /usr/share/doc/*
 
