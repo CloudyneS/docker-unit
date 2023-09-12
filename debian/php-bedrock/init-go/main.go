@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"os/user"
@@ -16,7 +18,10 @@ type Initializer interface {
 	RunAsUser(username string, command string, arguments []string) error
 	RunWpCli(args []string) error
 	PathExists(path string) error
+	DownloadFile(url string, path string) error
 	InstallDatabase() error
+	InstallFiles() error
+	ExtractFiles(source string, destination string) error
 	UpdateSalts() error
 	SetTheme() error
 	PerformChown() error
@@ -32,7 +37,11 @@ type WpInitializer struct {
 	ApplicationDir       string `json:"applicationDir" default:"/app"`
 	Permissions          string `json:"permissions" default:"770"`
 	ImportDatabase       bool   `json:"importDatabase" default:"false"`
-	DatabasePath         string `json:"databasePath" default:"/app/database.sql"`
+	DatabasePath         string `json:"databasePath" default:"/mnt/cloud/import.sql"`
+	DatabaseUrl          string `json:"databaseUrl" default:""`
+	ImportContent        bool   `json:"importContent" default:"false"`
+	ContentPath          string `json:"contentPath" default:"/mnt/cloud/import.zip"`
+	ContentUrl           string `json:"contentUrl" default:""`
 	OverwriteDatabase    bool   `json:"overwriteDatabase" default:"false"`
 	UpdatePermissions    bool   `json:"updatePermissions" default:"true"`
 	ConvertUploadsToWebp bool   `json:"convertUploadsToWebp" default:"false"`
@@ -88,10 +97,48 @@ func (ini *WpInitializer) PathExists(path string) error {
 	return err
 }
 
+func (ini *WpInitializer) DownloadFile(filepath string, url string) (err error) {
+
+	// Create the file
+	out, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	// Get the data
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Check server response
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("bad status: %s", resp.Status)
+	}
+
+	// Writer the body to file
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (ini *WpInitializer) InstallDatabase() error {
 	if ini.ImportDatabase {
 		if ini.DatabasePath == "" {
-			return fmt.Errorf("no path to import the database from specified")
+			if ini.DatabaseUrl == "" {
+				return fmt.Errorf("no path to import the database from specified")
+			}
+			// Download file
+			ini.DatabasePath = "/tmp/temp-import-database.sql"
+			err := ini.DownloadFile(ini.DatabasePath, ini.DatabaseUrl)
+			if err != nil {
+				return err
+			}
 		}
 		err := ini.PathExists(ini.DatabasePath)
 		if err != nil {
@@ -108,6 +155,59 @@ func (ini *WpInitializer) InstallDatabase() error {
 		if isInstalled != nil {
 			return ini.RunWpCli([]string{"db", "import", ini.DatabasePath})
 		}
+	}
+	return nil
+}
+
+func (ini *WpInitializer) ExtractFiles(source string, destination string) error {
+	// Check if string ends with .zip
+	if strings.HasSuffix(source, ".zip") {
+		return ini.RunAsUser(
+			ini.WebserverUser,
+			"unzip",
+			[]string{
+				source,
+				"-d",
+				destination,
+			},
+		)
+	}
+
+	if strings.HasSuffix(source, ".tar.gz") {
+		return ini.RunAsUser(
+			ini.WebserverUser,
+			"tar",
+			[]string{
+				"-xzf",
+				source,
+				"-C",
+				destination,
+			},
+		)
+	}
+
+	return fmt.Errorf("unsupported file format")
+}
+
+func (ini *WpInitializer) InstallFiles() error {
+	if ini.ImportContent {
+		if ini.ContentPath == "" {
+			if ini.ContentUrl == "" {
+				return fmt.Errorf("no path to import the content from specified")
+			}
+			// Download file
+			ini.ContentPath = "/tmp/temp-import-content.zip"
+			err := ini.DownloadFile(ini.ContentPath, ini.ContentUrl)
+			if err != nil {
+				return err
+			}
+		}
+		err := ini.PathExists(ini.ContentPath)
+		if err != nil {
+			return err
+		}
+
+		return ini.ExtractFiles(ini.ContentPath, "/app/web/app/")
 	}
 	return nil
 }
@@ -174,6 +274,9 @@ func (ini *WpInitializer) Run() {
 
 	fmt.Println("Installing Database")
 	ini.HandleErrors(ini.InstallDatabase())
+
+	fmt.Println("Installing Files")
+	ini.HandleErrors(ini.InstallFiles())
 
 	// Handle WebP Conversions
 	fmt.Println("Converting Uploads to WebP")
