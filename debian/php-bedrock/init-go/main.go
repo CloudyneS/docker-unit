@@ -166,6 +166,7 @@ func (ini *WpInitializer) ExtractFiles(source string, destination string) error 
 			ini.WebserverUser,
 			"unzip",
 			[]string{
+				"-f",
 				source,
 				"-d",
 				destination,
@@ -179,6 +180,7 @@ func (ini *WpInitializer) ExtractFiles(source string, destination string) error 
 			"tar",
 			[]string{
 				"-xzf",
+				"--overwrite",
 				source,
 				"-C",
 				destination,
