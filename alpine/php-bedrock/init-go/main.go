@@ -280,9 +280,6 @@ func (ini *WpInitializer) Run() {
 	fmt.Println("Installing Files")
 	ini.HandleErrors(ini.InstallFiles())
 
-	fmt.Println("Installing Files")
-	ini.HandleErrors(ini.InstallFiles())
-
 	// Handle WebP Conversions
 	fmt.Println("Converting Uploads to WebP")
 	if ini.ConvertUploadsToWebp {

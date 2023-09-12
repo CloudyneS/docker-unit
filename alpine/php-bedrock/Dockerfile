@@ -32,7 +32,7 @@ COPY ./init-go/config-sample.json /init-go/config.json
 COPY ./composer-config.json /etc/composer/config.json
 
 
-RUN apk add --no-cache git unzip mariadb-client && \
+RUN apk add --no-cache git zip unzip mariadb-client && \
     mkdir -p /etc/composer /etc/wpcli/packages && \
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
     curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
