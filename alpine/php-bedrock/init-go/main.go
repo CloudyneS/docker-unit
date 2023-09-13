@@ -268,17 +268,17 @@ func (ini *WpInitializer) HandleErrors(err error) {
 }
 
 func (ini *WpInitializer) Run() {
-	fmt.Println("Setting Permissions")
-	ini.HandleErrors(ini.PerformChmod())
-
-	fmt.Println("Setting Ownership")
-	ini.HandleErrors(ini.PerformChown())
-
 	fmt.Println("Installing Database")
 	ini.HandleErrors(ini.InstallDatabase())
 
 	fmt.Println("Installing Files")
 	ini.HandleErrors(ini.InstallFiles())
+
+	fmt.Println("Setting Permissions")
+	ini.HandleErrors(ini.PerformChmod())
+
+	fmt.Println("Setting Ownership")
+	ini.HandleErrors(ini.PerformChown())
 
 	// Handle WebP Conversions
 	fmt.Println("Converting Uploads to WebP")
