@@ -166,10 +166,10 @@ func (ini *WpInitializer) ExtractFiles(source string, destination string) error 
 			ini.WebserverUser,
 			"unzip",
 			[]string{
-				"-f",
-				source,
+				"-o",
 				"-d",
 				destination,
+				source,
 			},
 		)
 	}
