@@ -179,8 +179,8 @@ func (ini *WpInitializer) ExtractFiles(source string, destination string) error 
 			ini.WebserverUser,
 			"tar",
 			[]string{
-				"-xzf",
 				"--overwrite",
+				"-xzf",
 				source,
 				"-C",
 				destination,
