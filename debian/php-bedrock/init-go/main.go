@@ -199,6 +199,9 @@ func (ini *WpInitializer) InstallFiles() error {
 			}
 			// Download file
 			ini.ContentPath = "/tmp/temp-import-content.zip"
+			if strings.HasSuffix(source, ".tar.gz") {
+				ini.ContentPath = "/tmp/temp-import-content.tar.gz"
+			}
 			err := ini.DownloadFile(ini.ContentPath, ini.ContentUrl)
 			if err != nil {
 				return err
