@@ -31,12 +31,13 @@ COPY ./init-go/config-sample.json /init-go/config.json
 COPY ./composer-config.json /etc/composer/config.json
 
 RUN apt-get update && apt-get -y install git zip unzip mariadb-client && apt-get clean \
+    && mv /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini \
+    && echo -e "memory_limit = 1GB\n" >> /usr/local/etc/php/conf.d/docker-php-memory_limit.ini \
+    && sed -i 's/memory_limit = .*/memory_limit = 1G/' /usr/local/etc/php/php.ini \
     && mkdir -p /etc/composer /etc/wpcli/packages \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
     && chmod +x /usr/local/bin/wp \
-    && mv /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini \
-    && echo -e "memory_limit = 1GB\n" >> /usr/local/etc/php/conf.d/docker-php-memory_limit.ini \
     && /usr/local/bin/wp --allow-root package install aaemnnosttv/wp-cli-dotenv-command \
     && composer create-project roots/bedrock --no-interaction --no-dev . \
     && chown -R unit:unit /etc/wpcli /etc/composer /app \
