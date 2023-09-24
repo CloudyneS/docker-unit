@@ -37,6 +37,8 @@ RUN apk add --no-cache git zip unzip mariadb-client && \
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
     curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
     chmod +x /usr/local/bin/wp && \
+    mv /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini && \
+    echo -e "memory_limit = 1GB\n" >> /usr/local/etc/php/conf.d/docker-php-memory_limit.ini && \
     /usr/local/bin/wp --allow-root package install aaemnnosttv/wp-cli-dotenv-command && \
     composer create-project roots/bedrock --no-interaction --no-dev . && \
     cp /app/.env.example /app/.env && \
