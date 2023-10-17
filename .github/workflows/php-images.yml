@@ -14,6 +14,7 @@ on:
             
             container_image:
                 type: choice
+                default: "php-bedrock"
                 options:
                     - php-extended
                     - php-unit
@@ -23,7 +24,7 @@ on:
             
             php_version:
                 type: choice
-                default: "8.0"
+                default: "8.1"
                 options:
                     - "7.4"
                     - "8.0"
@@ -31,7 +32,7 @@ on:
                     - "8.2"
 jobs:
     build-alpine-extended:
-        if: github.event.inputs.container_base == 'alpine' && github.event.inputs.container_image == 'php-extended' && !github.event.inputs.build_all
+        if: github.event.inputs.container_base == 'alpine' && github.event.inputs.container_image == 'php-extended'
         runs-on: ubuntu-latest
         steps:
           - name: Checkout
@@ -99,7 +100,7 @@ jobs:
                   cloudyne.azurecr.io/${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
 
     debian-build-all:
-      if: github.event.inputs.build_all && github.event.inputs.container_base == 'debian'
+      if: github.event.inputs.build_all && github.event.inputs.container_base == 'xdebian'
       runs-on: ubuntu-latest
       steps:
         - name: Checkout
@@ -173,9 +174,7 @@ jobs:
     
 
     build:
-        if: |
-          ( github.event.inputs.container_base == 'debian' && github.event.inputs.build_all != true) ||
-          ( github.event.inputs.container_base == 'alpine' && github.event.inputs.container_image != 'php-extended' && github.event.inputs.build_all != true)
+        if: github.event.inputs.container_base == 'alpine' && github.event.inputs.container_image != 'php-extended'
         runs-on: ubuntu-latest
         steps:
           - name: Checkout
