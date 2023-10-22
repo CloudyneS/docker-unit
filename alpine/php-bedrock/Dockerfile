@@ -32,7 +32,8 @@ COPY ./init-go/config-sample.json /init-go/config.json
 COPY ./composer-config.json /etc/composer/config.json
 
 
-RUN apk add --no-cache git zip unzip mariadb-client && \
+RUN docker-php-ext-enable opcache && \
+    apk add --no-cache git zip unzip mariadb-client && \
     mv /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini && \
     echo -e "memory_limit = 1G \n" >> /usr/local/etc/php/conf.d/docker-php-memory_limit.ini && \
     sed -i 's/memory_limit = .*/memory_limit = 1G/' /usr/local/etc/php/php.ini && \
