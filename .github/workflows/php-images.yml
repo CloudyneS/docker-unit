@@ -2,10 +2,12 @@ on:
     workflow_dispatch:
         inputs:
             build_all:
+              description: "Build all images for this PHP Version/Arch"
               type: boolean
               default: false
 
             container_base:
+                description: "The base image to use"
                 type: choice
                 default: "alpine"
                 options:
@@ -15,14 +17,17 @@ on:
             container_image:
                 type: choice
                 default: "php-bedrock"
+                description: "The image to build"
                 options:
                     - php-extended
                     - php-unit
                     - php-bedrock
                     - php-laravel
                     - php-bookstack
+                    - php-itop
             
             php_version:
+                description: "The PHP Version to use"
                 type: choice
                 default: "8.1"
                 options:

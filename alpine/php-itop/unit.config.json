@@ -1,0 +1,95 @@
+{
+    "settings": {
+        "http": {
+            "header_read_timeout": 60,
+            "body_read_timeout": 60,
+            "idle_timeout": 60,
+            "max_body_size": 512111110
+        }
+    },
+    "listeners": {
+        "*:80": {
+            "pass": "routes"
+        }
+    },
+    "routes": [
+        {
+            "match": {
+                "uri": [
+                    "/conf*",
+                    "/data*",
+                    "/lib*",
+                    "/log*",
+                    "/setup/permissions-test-folder/permissions-test-subfolder*"
+                ]
+            },
+            "action": {
+                "return": 401
+            }
+        },
+        {
+            "action": {
+                "return": 200
+            },
+            "match": {
+                "uri": [
+                    "/unit-ping",
+                    "/fpm-ping"
+                ]
+            }
+        },
+        {
+            "action": {
+                "pass": "applications/php/direct"
+            },
+            "match": {
+                "uri": [
+                    "*.php",
+                    "*.php/*"
+                ]
+            }
+        },
+        {
+            "action": {
+                "share": "/app$uri",
+                "fallback": {
+                    "pass": "applications/php/index"
+                }
+            }
+        }
+    ],
+    "applications": {
+        "php": {
+            "type": "php",
+            "options": {
+                "user": {
+                    "display_errors": "Off",
+                    "log_errors": "On",
+                    "error_log": "/proc/self/fd/2"
+                },
+                "admin": {
+                    "short_open_tag": "Off",
+                    "disable_functions": "passthru,shell_exec,system,proc_open,popen,show_source",
+                    "date.timezone": "Europe/Stockholm",
+                    "max_execution_time": "300",
+                    "max_input_time": "300",
+                    "memory_limit": "512M",
+                    "post_max_size": "513M",
+                    "upload_max_filesize": "512M",
+                    "expose_php": "Off",
+                    "log_errors": "On",
+                    "error_log": "/proc/self/fd/2"
+                }
+            },
+            "targets": {
+                "direct": {
+                    "root": "/app"
+                },
+                "index": {
+                    "root": "/app",
+                    "script": "index.php"
+                }
+            }
+        }
+    }
+}
