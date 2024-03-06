@@ -1,4 +1,4 @@
-ARG SOURCE_VERSION=8.2
+ARG SOURCE_VERSION=8.1
 FROM ghcr.io/cloudynes/php-extended:${SOURCE_VERSION}-debian as BUILDER
 
 LABEL Version="1.0"

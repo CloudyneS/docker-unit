@@ -31,10 +31,9 @@ on:
                 type: choice
                 default: "8.1"
                 options:
-                    - "7.4"
-                    - "8.0"
                     - "8.1"
                     - "8.2"
+                    - "8.3"
 jobs:
     build-alpine-extended:
         if: github.event.inputs.container_base == 'alpine' && github.event.inputs.container_image == 'php-extended'
@@ -76,33 +75,18 @@ jobs:
               bash make-dockerfiles.sh
               cd ..
           
-          - name: Build image (PHP8.0)
-            if: github.event.inputs.php_version == '8.0'
-            uses: docker/build-push-action@v2
+          - name: Build Image (${{ github.event.inputs.php_version }})
+            uses: docker/build-push-action@v5
             with:
-                # cache-from: type=registry,ref=ghcr.io/cloudynes/${{ github.event.inputs.container_image }}:cache-${{ github.event.inputs.php_version }}
-                # cache-to: type=registry,ref=ghcr.io/cloudynes/${{ github.event.inputs.container_image }}:cache-${{ github.event.inputs.php_version }}
-                context: ./${{ github.event.inputs.container_base }}/${{ github.event.inputs.container_image }}/php-alpine-original/8.0/alpine3.16/cli
-                file: ./${{ github.event.inputs.container_base }}/${{ github.event.inputs.container_image }}/php-alpine-original/8.0/alpine3.16/cli/Dockerfile
-                push: true
-                tags: |
-                    ghcr.io/cloudynes/${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
-                    cloudyne/${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
-                    cloudyne.azurecr.io/${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
-          
-          - name: Build image (PHP8.1)
-            if: github.event.inputs.php_version == '8.1'
-            uses: docker/build-push-action@v2
-            with:
-              # cache-from: type=registry,ref=ghcr.io/cloudynes/${{ github.event.inputs.container_image }}:cache-${{ github.event.inputs.php_version }}
-              # cache-to: type=registry,ref=ghcr.io/cloudynes/${{ github.event.inputs.container_image }}:cache-${{ github.event.inputs.php_version }}
-              context: ./${{ github.event.inputs.container_base }}/${{ github.event.inputs.container_image }}/php-alpine-original/8.1/alpine3.18/cli
-              file: ./${{ github.event.inputs.container_base }}/${{ github.event.inputs.container_image }}/php-alpine-original/8.1/alpine3.18/cli/Dockerfile
+              context: ./${{ github.event.inputs.container_base }}/${{ github.event.inputs.container_image }}/php-alpine-original/${{ github.event.inputs.php_version }}/alpine3.19/cli
+              file: ./${{ github.event.inputs.container_base }}/${{ github.event.inputs.container_image }}/php-alpine-original/${{ github.event.inputs.php_version }}/alpine3.19/cli/Dockerfile
               push: true
+              platforms: linux/amd64,linux/arm64
               tags: |
-                  ghcr.io/cloudynes/${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
-                  cloudyne/${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
-                  cloudyne.azurecr.io/${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
+                ghcr.io/cloudynes/${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
+                cloudyne/${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
+                cloudyne.azurecr.io/${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
+          
 
     debian-build-all:
       if: github.event.inputs.build_all && github.event.inputs.container_base == 'xdebian'
@@ -213,12 +197,13 @@ jobs:
               password: ${{ secrets.AZURECR_SECRET }}
 
           - name: Build and push ${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
-            uses: docker/build-push-action@v2
+            uses: docker/build-push-action@v5
             with:
                 # cache-from: type=registry,ref=ghcr.io/cloudynes/${{ github.event.inputs.container_image }}:cache-${{ github.event.inputs.php_version }}
                 # cache-to: type=registry,ref=ghcr.io/cloudynes/${{ github.event.inputs.container_image }}:cache-${{ github.event.inputs.php_version }}
                 context: ./${{ github.event.inputs.container_base }}/${{ github.event.inputs.container_image }}
                 file: ./${{ github.event.inputs.container_base }}/${{ github.event.inputs.container_image }}/Dockerfile
+                platforms: linux/amd64,linux/arm64
                 push: true
                 build-args: |
                     SOURCE_VERSION=${{ github.event.inputs.php_version }}
