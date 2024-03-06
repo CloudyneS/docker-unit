@@ -55,7 +55,7 @@ RUN set -ex \
     && ./configure php \
     && make -j $NCPU php-install \
     && cd \
-    && rm -rf /usr/src/unit
+    && rm -rf /usr/src/unit \
     && ldd /usr/sbin/unitd | awk '/=>/{print $(NF-1)}' | while read n; do apk -q info --who-owns $n; done | sed 's/.*owned by //' | sort | uniq > /requirements.apk
 
 FROM ghcr.io/cloudynes/php-extended:${SOURCE_VERSION}-alpine
