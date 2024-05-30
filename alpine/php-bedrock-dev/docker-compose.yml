@@ -1,0 +1,14 @@
+services:
+  wordpress:
+    image: ghcr.io/cloudynes/php-bedrock-dev:8.0-fpm
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SOURCE_VERSION: "8.0"
+    environment:
+      DB_HOST: db
+      DB_USER: wp_user
+      DB_PASSWORD: wp_pass
+      DB_NAME: wordpress
+    

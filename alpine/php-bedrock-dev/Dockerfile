@@ -8,7 +8,6 @@ LABEL Description="PHP and Nginx Unit container for Kubernetes deployment"
 LABEL org.opencontainers.image.description="PHP and Nginx Unit container for Kubernetes deployment"
 LABEL org.opencontainers.image.licenses="MIT"
 
-
 USER root
 
 WORKDIR /app
@@ -23,7 +22,20 @@ COPY ./composer-config.json /etc/composer/config.json
 
 RUN set -x \
     && apk add --no-cache \
-        bash \
+        curl \
+        grep \
+        zlib-dev \
+        curl-dev \
+        expat-dev \
+        asciidoc \
+        xmlto \
+        perl-error \
+        perl-dev \
+        tcl \
+        tk \
+        g++ \
+        python3-dev \
+        pcre2-dev \
         git \
         zip \
         unzip \
@@ -63,10 +75,10 @@ RUN set -x \
     && /usr/local/bin/wp --allow-root package install aaemnnosttv/wp-cli-dotenv-command \
     && composer create-project roots/bedrock --no-interaction . \
     && cp /app/.env.example /app/.env \
+    && echo -e 'clear_env = no\r\nvariables_order = "EGPCS"\r\n' >> /usr/local/etc/php/conf.d/additional_vars.ini \
     && chown -R vscode:unit /etc/wpcli /etc/composer /app /var/lib/unit /var/run \
     && rm -rf /var/lib/apt/lists/* /tmp/* /usr/share/doc/*
 
-   
 USER vscode
 
 COPY --chown=vscode:unit ./config.json /docker-entrypoint.d/unit.json
