@@ -42,10 +42,10 @@ RUN set -x \
         sudo \
         openssh \
     && pecl install xdebug \
+    && echo "vscode ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
     && echo -e "[XDebug]\nxdebug.remote_enable = 1\nxdebug.remote_autostart = 1" > $PHP_INI_DIR/conf.d/xdebug.ini \
     && adduser \
         --ingroup unit \
-        --ingroup sudo \
         --home /app \
         --shell /bin/bash \
         --no-create-home \
