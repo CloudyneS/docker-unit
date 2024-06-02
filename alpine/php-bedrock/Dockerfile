@@ -37,7 +37,7 @@ RUN docker-php-ext-enable opcache && \
     mv /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini && \
     echo -e "memory_limit = 1G \n" >> /usr/local/etc/php/conf.d/docker-php-memory_limit.ini && \
     sed -i 's/memory_limit = .*/memory_limit = 1G/' /usr/local/etc/php/php.ini && \
-    && echo -e 'clear_env = no\r\nvariables_order = "EGPCS"\r\n' >> /usr/local/etc/php/conf.d/additional_vars.ini \
+    echo -e 'clear_env = no\r\nvariables_order = "EGPCS"\r\n' >> /usr/local/etc/php/conf.d/additional_vars.ini && \
     mkdir -p /etc/composer /etc/wpcli/packages && \
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
     curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
