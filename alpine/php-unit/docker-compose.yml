@@ -1,16 +1,5 @@
 version: "3.2"
 services:
-  php80-alpine-unit:
-    image: ghcr.io/cloudynes/php-alpine-unit:8.0
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        SOURCE_VERSION: 8.0
-    volumes:
-      - ./config.json:/docker-entrypoint.d/config.json
-    ports:
-      - 8080:8080
   php81-alpine-unit:
     image: ghcr.io/cloudynes/php-alpine-unit:8.1
     build:

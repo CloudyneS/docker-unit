@@ -1,4 +1,4 @@
-ARG SOURCE_VERSION=8.0
+ARG SOURCE_VERSION=8.1
 FROM ghcr.io/cloudynes/php-extended:${SOURCE_VERSION}-alpine as BUILDER
 
 LABEL Version="1.0"
@@ -18,17 +18,19 @@ RUN set -ex \
     && mkdir -p /usr/lib/unit/modules /usr/lib/unit/debug-modules \
     && hg clone https://hg.nginx.org/unit \
     && cd unit \
-    && hg up 1.30.0-1 \
+    && hg up 1.32.0-1 \
     && NCPU="$(getconf _NPROCESSORS_ONLN)" \
-    && DEB_HOST_MULTIARCH="x86_64-linux-gnu" \
+    && DEB_HOST_MULTIARCH="$(dpkg-architecture -q DEB_HOST_MULTIARCH)" \
     && CC_OPT="$(DEB_BUILD_MAINT_OPTIONS="hardening=+all,-pie" DEB_CFLAGS_MAINT_APPEND="-Wp,-D_FORTIFY_SOURCE=2 -fPIC" dpkg-buildflags --get CFLAGS)" \
     && LD_OPT="$(DEB_BUILD_MAINT_OPTIONS="hardening=+all,-pie" DEB_LDFLAGS_MAINT_APPEND="-Wl,--as-needed -pie" dpkg-buildflags --get LDFLAGS)" \
     && CONFIGURE_ARGS_MODULES="--prefix=/usr \
-                --state=/var/lib/unit \
+                --statedir=/var/lib/unit \
                 --control=unix:/var/run/control.unit.sock \
+                --runstatedir=/var/run \
                 --pid=/var/run/unit.pid \
+                --logdir=/var/log \
                 --log=/var/log/unit.log \
-                --tmp=/var/tmp \
+                --tmpdir=/var/tmp \
                 --user=unit \
                 --group=unit \
                 --openssl \
@@ -52,6 +54,8 @@ RUN set -ex \
     && ./configure $CONFIGURE_ARGS_MODULES --cc-opt="$CC_OPT" --modules=/usr/lib/unit/modules \
     && ./configure php \
     && make -j $NCPU php-install \
+    && cd \
+    && rm -rf /usr/src/unit \
     && ldd /usr/sbin/unitd | awk '/=>/{print $(NF-1)}' | while read n; do apk -q info --who-owns $n; done | sed 's/.*owned by //' | sort | uniq > /requirements.apk
 
 FROM ghcr.io/cloudynes/php-extended:${SOURCE_VERSION}-alpine
