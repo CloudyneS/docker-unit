@@ -42,10 +42,14 @@ RUN docker-php-ext-enable opcache && \
     curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
     chmod +x /usr/local/bin/wp && \
     /usr/local/bin/wp --allow-root package install aaemnnosttv/wp-cli-dotenv-command && \
-    composer create-project roots/bedrock --no-interaction --no-dev . && \
-    cp /app/.env.example /app/.env && \
     chown -R unit:unit /etc/wpcli /etc/composer /app /var/lib/unit /var/run && \
     rm -rf /var/lib/apt/lists/* /tmp/* /usr/share/doc/*
+
+USER unit
+
+RUN composer create-project roots/bedrock --no-interaction --no-dev . && \
+    cp /app/.env.example /app/.env
+    
 
 USER unit
 
