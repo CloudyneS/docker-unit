@@ -19,6 +19,8 @@ ENV WP_CLI_CACHE_DIR="/tmp/wpcli/cache"             \
     COMPOSER_HOME="/etc/composer"
 
 COPY ./composer-config.json /etc/composer/config.json
+COPY --chown=vscode:unit ./config.json /docker-entrypoint.d/unit.json
+COPY docker-entrypoint.sh /usr/local/bin/
 
 RUN set -x \
     && apk add --no-cache \
@@ -73,15 +75,29 @@ RUN set -x \
     && curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
     && chmod +x /usr/local/bin/wp \
     && /usr/local/bin/wp --allow-root package install aaemnnosttv/wp-cli-dotenv-command \
-    && composer create-project roots/bedrock --no-interaction . \
-    && cp /app/.env.example /app/.env \
     && echo -e 'clear_env = no\r\nvariables_order = "EGPCS"\r\n' >> /usr/local/etc/php/conf.d/additional_vars.ini \
     && chown -R vscode:unit /etc/wpcli /etc/composer /app /var/lib/unit /var/run \
+    && chmod +x /usr/local/bin/docker-entrypoint.sh \
     && rm -rf /var/lib/apt/lists/* /tmp/* /usr/share/doc/*
 
 USER vscode
 
-COPY --chown=vscode:unit ./config.json /docker-entrypoint.d/unit.json
+RUN composer create-project roots/bedrock --no-interaction . && \
+    cp /app/.env.example /app/.env && \
+    mkdir /app/.vscode
+
+COPY --chown=vscode:unit vscode-launch.json /app/.vscode/launch.json
+
+
+ENV ADMIN_USER=admin \
+    ADMIN_PASSWORD=password \
+    ADMIN_EMAIL="admin@host.local" \
+    SITE_TITLE="WordPress Development Site" \
+    SITE_URL="http://localhost:8080" \
+    DB_PREFIX="wpdev_" \
+    DATABASE_URL="mysql://wp_user:wp_password@db:3306/wordpress"
+
+
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
