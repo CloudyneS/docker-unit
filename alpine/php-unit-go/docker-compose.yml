@@ -1,0 +1,13 @@
+version: "3.2"
+services:
+  php81-alpine-unit-go:
+    image: ghcr.io/cloudynes/php-alpine-unit-go:8.1
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SOURCE_VERSION: 8.1
+    volumes:
+      - ./config.json:/docker-entrypoint.d/config.json
+    ports:
+      - 8080:8080
