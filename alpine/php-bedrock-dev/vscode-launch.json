@@ -1,0 +1,29 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "NPM Run Start",
+            "request": "launch",
+            "runtimeArgs": [
+                "run",
+                "start",
+                "--hot"
+            ],
+            "runtimeExecutable": "npm",
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node",
+            "cwd": "${workspaceFolder}/web/app/plugins/plugin-dev"
+        },
+        {
+            "name": "Listen for Xdebug",
+            "type": "php",
+            "request": "launch",
+            "port": 9003
+        }
+    ]
+}

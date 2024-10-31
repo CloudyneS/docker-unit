@@ -33,19 +33,24 @@ COPY ./composer-config.json /etc/composer/config.json
 
 
 RUN docker-php-ext-enable opcache && \
-    apk add --no-cache git zip unzip mariadb-client && \
+    apk add --no-cache git zip unzip mariadb-client nano && \
     mv /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini && \
     echo -e "memory_limit = 1G \n" >> /usr/local/etc/php/conf.d/docker-php-memory_limit.ini && \
     sed -i 's/memory_limit = .*/memory_limit = 1G/' /usr/local/etc/php/php.ini && \
+    echo -e 'clear_env = no\r\nvariables_order = "EGPCS"\r\n' >> /usr/local/etc/php/conf.d/additional_vars.ini && \
     mkdir -p /etc/composer /etc/wpcli/packages && \
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
     curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
     chmod +x /usr/local/bin/wp && \
     /usr/local/bin/wp --allow-root package install aaemnnosttv/wp-cli-dotenv-command && \
-    composer create-project roots/bedrock --no-interaction --no-dev . && \
-    cp /app/.env.example /app/.env && \
     chown -R unit:unit /etc/wpcli /etc/composer /app /var/lib/unit /var/run && \
     rm -rf /var/lib/apt/lists/* /tmp/* /usr/share/doc/*
+
+USER unit
+
+RUN composer create-project roots/bedrock --no-interaction --no-dev . && \
+    cp /app/.env.example /app/.env
+    
 
 USER unit
 
