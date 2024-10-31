@@ -14,6 +14,14 @@
     },
     "routes": [
         {
+            "action": {
+                "pass": "applications/php/toolkit"
+            },
+            "match": {
+                "uri": "/toolkit/*.php"
+            }
+        },
+        {
             "match": {
                 "uri": [
                     "/conf*",
@@ -87,6 +95,10 @@
                 },
                 "index": {
                     "root": "/app",
+                    "script": "index.php"
+                },
+                "toolkit": {
+                    "root": "/app/toolkit",
                     "script": "index.php"
                 }
             }
