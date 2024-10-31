@@ -43,6 +43,20 @@ jobs:
               registry: ${{ secrets.AZURECR_URL }}
               username: ${{ secrets.AZURECR_USER }}
               password: ${{ secrets.AZURECR_SECRET }}
+          
+          - name: Build and push Stage 1
+            uses: docker/build-push-action@v5
+            with:
+              context: ./alpine/php-unit-go
+              file: ./alpine/php-unit-go/stage1.Dockerfile
+              platforms: linux/amd64,linux/arm64
+              push: false
+              build-args: |
+                SOURCE_VERSION=${{ github.event.inputs.php_version }}
+              tags: |
+                ghcr.io/cloudynes/php-unit-go:stage1-${{ github.event.inputs.php_version }}-alpine
+
+
 
           - name: Build and push ghcr.io/cloudynes/php-unit-go:${{ github.event.inputs.php_version }}-alpine
             uses: docker/build-push-action@v5

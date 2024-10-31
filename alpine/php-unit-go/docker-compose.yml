@@ -1,13 +1,27 @@
 version: "3.2"
 services:
-  php81-alpine-unit-go:
-    image: ghcr.io/cloudynes/php-alpine-unit-go:8.1
+  # Compile Nginx Unit for PHP and Go
+  stage1:
+    image: ghcr.io/cloudynes/php-unit-go:stage1-8.1-alpine
     build:
       context: .
-      dockerfile: Dockerfile
-      args:
-        SOURCE_VERSION: 8.1
+      dockerfile: stage1.Dockerfile
+  
+  # Compile Go application to run with Nginx Unit
+  stage2:
+    image: ghcr.io/cloudynes/php-unit-go:stage2-8.1-alpine
+    build:
+      context: .
+      dockerfile: stage2.Dockerfile
+  
+  # Build final minimal image with Nginx Unit and Go application
+  stage3:
+    image: ghcr.io/cloudynes/php-alpine-unit-go:8.1-alpine
+    build:
+      context: .
+      dockerfile: stage3.Dockerfile
     volumes:
       - ./config.json:/docker-entrypoint.d/config.json
+      - ./index.php:/app/web/index.php
     ports:
       - 8080:8080

@@ -28,8 +28,6 @@ RUN set -ex \
         openssl-dev \
         pcre2-dev \
         dpkg dpkg-dev \
-        ca-certificates \
-        curl \
     && mkdir -p /usr/lib/unit/modules /usr/lib/unit/debug-modules \
     && mkdir -p /usr/src/unit \
     && cd /usr/src/unit \
@@ -72,61 +70,7 @@ RUN set -ex \
     && ./configure go --go-path=${GOPATH} \
     && ./configure php \
     && make -j $NCPU go-install-src libunit-install php-install \
-    && cp /usr/lib/x86_64-linux-musl/libunit.a /usr/lib/libunit.a \
-    && apk add --no-cache musl-dev \
-    && cd /src/goapp \
-    && go get \
-    && CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags "-L /usr/src/unit/build/lib -L /usr/lib/unit/modules/" -o /app/goapp main.go \
-    && chmod +x /app/goapp \
     && rm -rf /usr/src/unit \
-    && ldd /usr/sbin/unitd | awk '/=>/{print $(NF-1)}' | while read n; do apk -q info --who-owns $n; done | sed 's/.*owned by //' | sort | uniq > /requirements.apk
+    && ldd /usr/sbin/unitd | awk '/=>/{print $(NF-1)}' | while read n; do apk -q info --who-owns $n; done | sed 's/.*owned by //' | sort | uniq > /requirements.apk \
+    && cp /usr/lib/x86_64-linux-musl/libunit.a /usr/lib/libunit.a
 
-
-FROM ghcr.io/cloudynes/php-extended:${SOURCE_VERSION}-alpine
-COPY docker-entrypoint.sh /usr/local/bin/
-COPY --from=BUILDER /usr/sbin/unitd /usr/sbin/unitd
-COPY --from=BUILDER /usr/sbin/unitd-debug /usr/sbin/unitd-debug
-COPY --from=BUILDER /usr/lib/unit/ /usr/lib/unit/
-COPY --from=BUILDER /requirements.apk /requirements.apk
-COPY --from=BUILDER --chown=unit:unit /app/goapp /app/goapp
-
-COPY --from=GOGET /usr/local/go /usr/local/go
-COPY --from=GOGET /go /go
-
-ENV GOTOOLCHAIN=local
-ENV GOPATH=/go
-ENV GOLANG_VERSION=1.23.2
-ENV PATH=$PATH:/usr/local/go/bin
-ENV GOCACHE=/tmp
-
-RUN ldconfig / && \
-    set -x \
-    && if [ -f "/tmp/libunit.a" ]; then \
-        mv /tmp/libunit.a /usr/lib/$(dpkg-architecture -q DEB_HOST_MULTIARCH)/libunit.a; \
-        rm -f /tmp/libunit.a; \
-    fi \
-    && mkdir -p /var/lib/unit/ \
-    && mkdir /docker-entrypoint.d/ \
-    && addgroup --system --gid 101 unit \
-    && adduser \
-        --system \
-        --ingroup unit \
-        --no-create-home \
-        --home /nonexistent \
-        --gecos "unit user" \
-        --shell /bin/false \
-        --uid 101 \
-        unit \
-    && apk add --no-cache $(cat /requirements.apk) \
-    && rm -f /requirements.apk \
-    && ln -sf /dev/stdout /var/log/unit.log \
-    && mkdir -p /var/lib/unit /app/web && chown -R unit:unit /var/run /run /var/lib/unit /app /app/web 
-
-
-USER unit
-
-STOPSIGNAL SIGTERM
-
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-
-CMD ["unitd", "--no-daemon", "--control", "unix:/var/run/control.unit.sock"]
