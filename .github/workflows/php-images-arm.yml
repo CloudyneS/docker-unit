@@ -2,7 +2,7 @@ on:
     workflow_dispatch:
         inputs:
             build_all:
-              description: "Build all images for this PHP Version/Arch"
+              description: "Build all images for this PHP Version (ARM64)"
               type: boolean
               default: false
 
@@ -37,7 +37,7 @@ on:
 jobs:
     build-alpine-extended:
         if: github.event.inputs.container_base == 'alpine' && github.event.inputs.container_image == 'php-extended'
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-latest-arm64
         steps:
           - name: Checkout
             uses: actions/checkout@v2
@@ -81,7 +81,7 @@ jobs:
               context: ./${{ github.event.inputs.container_base }}/${{ github.event.inputs.container_image }}/php-alpine-original/${{ github.event.inputs.php_version }}/alpine3.19/cli
               file: ./${{ github.event.inputs.container_base }}/${{ github.event.inputs.container_image }}/php-alpine-original/${{ github.event.inputs.php_version }}/alpine3.19/cli/Dockerfile
               push: true
-              platforms: linux/amd64,linux/arm64
+              platforms: linux/arm64
               tags: |
                 ghcr.io/cloudynes/${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
                 cloudyne/${{ github.event.inputs.container_image }}:${{ github.event.inputs.php_version }}-${{ github.event.inputs.container_base }}
@@ -203,7 +203,7 @@ jobs:
                 # cache-to: type=registry,ref=ghcr.io/cloudynes/${{ github.event.inputs.container_image }}:cache-${{ github.event.inputs.php_version }}
                 context: ./${{ github.event.inputs.container_base }}/${{ github.event.inputs.container_image }}
                 file: ./${{ github.event.inputs.container_base }}/${{ github.event.inputs.container_image }}/Dockerfile
-                platforms: linux/amd64,linux/arm64
+                platforms: linux/arm64
                 push: true
                 build-args: |
                     SOURCE_VERSION=${{ github.event.inputs.php_version }}
