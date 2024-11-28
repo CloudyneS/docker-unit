@@ -49,8 +49,8 @@ jobs:
           - name: Build and push php-bedrock PHP${{ matrix.phpver }}
             uses: docker/build-push-action@v5
             with:
-              cache-from: type=registry,ref=ghcr.io/cloudynes/php-bedrock:cache-alpine-${{ matrix.phpver }}
-              cache-to: type=registry,ref=ghcr.io/cloudynes/php-bedrock:cache-alpine-${{ matrix.phpver }}
+              #cache-from: type=registry,ref=ghcr.io/cloudynes/php-bedrock:cache-alpine-${{ matrix.phpver }}
+              #cache-to: type=registry,ref=ghcr.io/cloudynes/php-bedrock:cache-alpine-${{ matrix.phpver }}
               context: ./alpine/php-bedrock
               file: ./alpine/php-bedrock/Dockerfile
               platforms: linux/arm64,linux/amd64
