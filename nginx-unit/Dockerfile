@@ -1,7 +1,6 @@
 ARG SOURCE_VERSION=8.2
-FROM golang:1.24.3-alpine AS GOGET
-# FROM ghcr.io/cloudynes/php-extended:${SOURCE_VERSION}-alpine as BUILDER
-FROM test/php-extended:${SOURCE_VERSION}-alpine as BUILDER
+FROM golang:1.24.3-alpine AS goget
+FROM ghcr.io/cloudynes/php-extended:${SOURCE_VERSION}-alpine AS builder
 
 LABEL Version="1.0"
 LABEL Maintainer="Cloudyne Systems"
@@ -10,8 +9,8 @@ LABEL Description="PHP and Nginx Unit container for Kubernetes deployment"
 LABEL org.opencontainers.image.description="PHP and Nginx Unit container for Kubernetes deployment"
 LABEL org.opencontainers.image.licenses="MIT"
 
-COPY --from=GOGET /usr/local/go /usr/local/go
-COPY --from=GOGET /go /go
+COPY --from=goget /usr/local/go /usr/local/go
+COPY --from=goget /go /go
 
 ENV GOTOOLCHAIN=local
 ENV GOBIN=/usr/local/go/bin
@@ -98,24 +97,23 @@ RUN set -ex && \
     && cd \
     && rm -rf /usr/src/unit \
     && for f in /usr/sbin/unitd /usr/lib/unit/modules/*.unit.so; do \
-        ldd $f | awk '/=>/{print $(NF-1)}' | while read n; do apk -q info --who-owns $n; done | sed 's/.*owned by //' | sort | uniq >> /requirements.apk \
+        ldd $f | awk '/=>/{print $(NF-1)}' | while read n; do apk -q info --who-owns $n; done | sed 's/.*owned by //' | sort | uniq >> /requirements.apk; \
        done
 
-# FROM ghcr.io/cloudynes/php-extended:${SOURCE_VERSION}-alpine as BUILDER
-FROM test/php-extended:${SOURCE_VERSION}-alpine as BUILDER
+ARG SOURCE_VERSION=8.2
+FROM ghcr.io/cloudynes/php-extended:${SOURCE_VERSION}-alpine
 COPY docker-entrypoint.sh /usr/local/bin/
-COPY --from=BUILDER /usr/sbin/unitd /usr/sbin/unitd
-COPY --from=BUILDER /usr/sbin/unitd-debug /usr/sbin/unitd-debug
-COPY --from=BUILDER /usr/lib/unit/ /usr/lib/unit/
-COPY --from=BUILDER /requirements.apk /requirements.apk
-COPY --from=BUILDER --chown=unit:unit /app/goapp /app/goapp
+COPY --from=builder /usr/sbin/unitd /usr/sbin/unitd
+COPY --from=builder /usr/sbin/unitd-debug /usr/sbin/unitd-debug
+COPY --from=builder /usr/lib/unit/ /usr/lib/unit/
+COPY --from=builder /requirements.apk /requirements.apk
 
-COPY --from=GOGET /usr/local/go /usr/local/go
-COPY --from=GOGET /go /go
+COPY --from=goget /usr/local/go /usr/local/go
+COPY --from=goget /go /go
 
 ENV GOTOOLCHAIN=local
 ENV GOPATH=/go
-ENV GOLANG_VERSION=1.23.2
+ENV GOLANG_VERSION=1.24.3
 ENV PATH=$PATH:/usr/local/go/bin
 ENV GOCACHE=/tmp
 

@@ -1,0 +1,39 @@
+diff --git a/pkg/docker/Dockerfile.php8.4 b/pkg/docker/Dockerfile.php8.4
+index c6a36da7..9cbb91bc 100644
+--- a/pkg/docker/Dockerfile.php8.4
++++ b/pkg/docker/Dockerfile.php8.4
+@@ -1,4 +1,16 @@
+-FROM php:8.4-cli-bookworm
++ARG SOURCE_VERSION=8.2
++FROM golang:1.24.3-bookworm AS goget
++FROM ghcr.io/cloudynes/php-extended:${SOURCE_VERSION}-debian
++
++COPY --from=goget /usr/local/go /usr/local/go
++COPY --from=goget /go /go
++
++ENV GOTOOLCHAIN=local
++ENV GOBIN=/usr/local/go/bin
++ENV GOPATH=/go
++ENV GOLANG_VERSION=1.24.3
++ENV PATH=$PATH:/usr/local/go/bin
++ENV GOCACHE=/tmp
+ 
+ LABEL org.opencontainers.image.title="Unit (php8.4)"
+ LABEL org.opencontainers.image.description="Official build of Unit for Docker."
+@@ -68,12 +80,14 @@ RUN set -ex \
+     && make clean \
+     && /bin/true \
+     && ./configure $CONFIGURE_ARGS_MODULES --cc-opt="$CC_OPT" --modulesdir=/usr/lib/unit/debug-modules --debug \
++    && ./configure go --go-path=${GOPATH} \
+     && ./configure php \
+-    && make -j $NCPU php-install \
++    && make -j $NCPU go-install-src libunit-install php-install \
+     && make clean \
+     && ./configure $CONFIGURE_ARGS_MODULES --cc-opt="$CC_OPT" --modulesdir=/usr/lib/unit/modules \
++    && ./configure go --go-path=${GOPATH} \
+     && ./configure php \
+-    && make -j $NCPU php-install \
++    && make -j $NCPU go-install-src libunit-install php-install \
+     && cd \
+     && rm -rf /usr/src/unit \
+     && for f in /usr/sbin/unitd /usr/lib/unit/modules/*.unit.so; do \

@@ -1,14 +1,10 @@
 on:
   workflow_dispatch:
-  # push:
-  #   branches:
-  #     - main
-  #   paths:
-  #     - ".github/workflows/php-stack.yml"
-
-env:
-  #
-  
+  push:
+    branches:
+      - upgrade-2025
+    paths:
+      - ".github/workflows/build-unit.yml"
 
 jobs:
   build-php-unit:
@@ -47,32 +43,39 @@ jobs:
 
       - name: Prepare Dockerfiles for Debian
         run: |
-          
-          
+          cd nginx-unit/nginx-unit
+          git apply -v --ignore-space-change --ignore-whitespace --ignore-cr-at-eol ../nginx-unit.patch
+          cd ../../
       
       - name: Build Alpine Image
         uses: docker/build-push-action@v6
         with:
-          context: php/docker-php/${{ matrix.php_version }}/alpine${{ env.ALPINE_VERSION }}/cli
-          file: php/docker-php/${{ matrix.php_version }}/alpine${{ env.ALPINE_VERSION }}/cli/Dockerfile
+          context: nginx-unit
+          file: nginx-unit/Dockerfile
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            SOURCE_VERSION=${{ matrix.php_version }}
           tags: |
-            ghcr.io/cloudynes/php-extended:${{ matrix.php_version }}-alpine-${{ matrix.arch.arch }}
+            ghcr.io/cloudynes/nginx-unit:${{ matrix.php_version }}-alpine-${{ matrix.arch.arch }}
       
       - name: Build Debian Image
         uses: docker/build-push-action@v6
         with:
-          context: php/docker-php/${{ matrix.php_version }}/${{ env.DEBIAN_VERSION }}/cli
-          file: php/docker-php/${{ matrix.php_version }}/${{ env.DEBIAN_VERSION }}/cli/Dockerfile
+          context: nginx-unit/nginx-unit/pkg/docker
+          file: nginx-unit/nginx-unit/pkg/docker/Dockerfile.php8.4
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            SOURCE_VERSION=${{ matrix.php_version }}
           tags: |
-            ghcr.io/cloudynes/php-extended:${{ matrix.php_version }}-debian-${{ matrix.arch.arch }}
+            ghcr.io/cloudynes/nginx-unit:${{ matrix.php_version }}-debian-${{ matrix.arch.arch }}
 
   combine:
     runs-on: ubuntu-latest
-    needs: build-php-extended
+    needs: build-php-unit
     strategy:
       fail-fast: true
       matrix:
@@ -119,23 +122,23 @@ jobs:
         name: Create manifest for debian
         with:
           tags: |
-            ghcr.io/cloudynes/php-extended:${{ matrix.php_version }}-debian
-            cloudyne/php-extended:${{ matrix.php_version }}-debian
-            cloudyne.azurecr.io/php-extended:${{ matrix.php_version }}-debian
+            ghcr.io/cloudynes/php-unit:${{ matrix.php_version }}-debian
+            cloudyne/php-unit:${{ matrix.php_version }}-debian
+            cloudyne.azurecr.io/php-unit:${{ matrix.php_version }}-debian
           sources: |
-            ghcr.io/cloudynes/php-extended:${{ matrix.php_version }}-debian-amd64
-            ghcr.io/cloudynes/php-extended:${{ matrix.php_version }}-debian-arm64
+            ghcr.io/cloudynes/php-unit:${{ matrix.php_version }}-debian-amd64
+            ghcr.io/cloudynes/php-unit:${{ matrix.php_version }}-debian-arm64
           push: true
 
       - uses: int128/docker-manifest-create-action@v2
         name: Create manifest for alpine
         with:
           tags: |
-            ghcr.io/cloudynes/php-extended:${{ matrix.php_version }}-alpine
-            cloudyne/php-extended:${{ matrix.php_version }}-alpine
-            cloudyne.azurecr.io/php-extended:${{ matrix.php_version }}-alpine
+            ghcr.io/cloudynes/php-unit:${{ matrix.php_version }}-alpine
+            cloudyne/php-unit:${{ matrix.php_version }}-alpine
+            cloudyne.azurecr.io/php-unit:${{ matrix.php_version }}-alpine
           sources: |
-            ghcr.io/cloudynes/php-extended:${{ matrix.php_version }}-alpine-amd64
-            ghcr.io/cloudynes/php-extended:${{ matrix.php_version }}-alpine-arm64
+            ghcr.io/cloudynes/php-unit:${{ matrix.php_version }}-alpine-amd64
+            ghcr.io/cloudynes/php-unit:${{ matrix.php_version }}-alpine-arm64
           push: true
 
