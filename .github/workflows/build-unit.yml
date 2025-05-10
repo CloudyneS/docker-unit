@@ -58,7 +58,7 @@ jobs:
           build-args: |
             SOURCE_VERSION=${{ matrix.php_version }}
           tags: |
-            ghcr.io/cloudynes/nginx-unit:${{ matrix.php_version }}-alpine-${{ matrix.arch.arch }}
+            ghcr.io/cloudynes/php-unit:${{ matrix.php_version }}-alpine-${{ matrix.arch.arch }}
       
       - name: Build Debian Image
         uses: docker/build-push-action@v6
@@ -71,7 +71,7 @@ jobs:
           build-args: |
             SOURCE_VERSION=${{ matrix.php_version }}
           tags: |
-            ghcr.io/cloudynes/nginx-unit:${{ matrix.php_version }}-debian-${{ matrix.arch.arch }}
+            ghcr.io/cloudynes/php-unit:${{ matrix.php_version }}-debian-${{ matrix.arch.arch }}
 
   combine:
     runs-on: ubuntu-latest
