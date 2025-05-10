@@ -1,0 +1,139 @@
+on:
+  workflow_dispatch:
+
+env:
+  ALPINE_VERSION: "3.21"
+  DEBIAN_VERSION: "bookworm"
+  ALPINE_PACKAGES: "zlib-dev jpeg-dev freetype-dev libwebp-dev icu-dev libpng-dev libzip-dev mariadb-dev krb5-dev"
+  DEBIAN_PACKAGES: "libjpeg-dev libfreetype6-dev libwebp-dev libicu-dev libpng-dev libzip-dev default-libmysqlclient-dev libkrb5-dev"
+  PHP_EXTENSIONS: "--enable-embed --enable-gd --enable-intl --with-pdo-mysql --with-mysqli --enable-opcache --with-zip --enable-bcmath --with-kerberos --with-imap-ssl --with-freetype --with-jpeg --with-webp"
+
+jobs:
+  build-php-extended:
+    runs-on: ${{ matrix.arch.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        arch:
+          - os: ubuntu-latest
+            arch: amd64
+          - os: ubuntu-latest-arm
+            arch: arm64
+        php_version:
+          - "8.1"
+          - "8.2"
+          - "8.3"
+          - "8.4"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: true
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+      
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: cloudynes
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepare Dockerfiles
+        run: |
+          sed -ie 's/sqlite-dev \\/sqlite-dev ${{ env.ALPINE_PACKAGES }} \\/g' php/docker-php/${{ matrix.php_version }}/alpine${{ env.ALPINE_VERSION }}/cli/Dockerfile
+          sed -ie 's/zlib1g-dev \\/zlib1g-dev ${{ env.DEBIAN_PACKAGES }} \\/g' php/docker-php/${{ matrix.php_version }}/debian/${{ env.DEBIAN_VERSION }}/cli/Dockerfile
+          sed -ie 's/--enable-option-checking=fatal \\/--enable-option-checking=fatal ${{ env.PHP_EXTENSIONS }} \\ /' php/docker-php/${{ matrix.php_version }}/alpine${{ env.ALPINE_VERSION }}/cli/Dockerfile
+          sed -ie 's/--enable-option-checking=fatal \\/--enable-option-checking=fatal ${{ env.PHP_EXTENSIONS }} \\ /' php/docker-php/${{ matrix.php_version }}/${{ env.DEBIAN_VERSION }}/cli/Dockerfile
+      
+      - name: Build Alpine Image
+        uses: docker/build-push-action@v6
+        with:
+          context: php/docker-php/${{ matrix.php_version }}/alpine${{ env.ALPINE_VERSION }}/cli
+          file: php/docker-php/${{ matrix.php_version }}/alpine${{ env.ALPINE_VERSION }}/cli/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/cloudynes/php-extended:${{ matrix.php_version }}-alpine-${{ matrix.arch.arch }}
+      
+      - name: Build Debian Image
+        uses: docker/build-push-action@v6
+        with:
+          context: php/docker-php/${{ matrix.php_version }}/${{ env.DEBIAN_VERSION }}/cli
+          file: php/docker-php/${{ matrix.php_version }}/${{ env.DEBIAN_VERSION }}/cli/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/cloudynes/php-extended:${{ matrix.php_version }}-debian-${{ matrix.arch.arch }}
+
+  combine:
+    runs-on: ubuntu-latest
+    needs: build-php-extended
+    strategy:
+      fail-fast: true
+      matrix:
+        php_version:
+          - "8.1"
+          - "8.2"
+          - "8.3"
+          - "8.4"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+      
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: cloudynes
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Login to Azure Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.AZURECR_URL }}
+          username: ${{ secrets.AZURECR_USER }}
+          password: ${{ secrets.AZURECR_SECRET }}
+      
+      - uses: int128/docker-manifest-create-action@v2
+        name: Create manifest for debian
+        with:
+          tags: |
+            ghcr.io/cloudynes/php-extended:${{ matrix.php_version }}-debian
+            cloudyne/php-extended:${{ matrix.php_version }}-debian
+            cloudyne.azurecr.io/php-extended:${{ matrix.php_version }}-debian
+          sources: |
+            ghcr.io/cloudynes/php-extended:${{ matrix.php_version }}-debian-amd64
+            ghcr.io/cloudynes/php-extended:${{ matrix.php_version }}-debian-arm64
+          push: true
+
+      - uses: int128/docker-manifest-create-action@v2
+        name: Create manifest for alpine
+        with:
+          tags: |
+            ghcr.io/cloudynes/php-extended:${{ matrix.php_version }}-alpine
+            cloudyne/php-extended:${{ matrix.php_version }}-alpine
+            cloudyne.azurecr.io/php-extended:${{ matrix.php_version }}-alpine
+          sources: |
+            ghcr.io/cloudynes/php-extended:${{ matrix.php_version }}-alpine-amd64
+            ghcr.io/cloudynes/php-extended:${{ matrix.php_version }}-alpine-arm64
+          push: true
+

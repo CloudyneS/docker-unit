@@ -1,0 +1,3 @@
+[submodule "php/docker-php"]
+	path = php/docker-php
+	url = https://github.com/docker-library/php.git
