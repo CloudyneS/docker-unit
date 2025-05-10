@@ -46,7 +46,7 @@ jobs:
       - name: Prepare Dockerfiles
         run: |
           sed -ie 's/sqlite-dev \\/sqlite-dev ${{ env.ALPINE_PACKAGES }} \\/g' php/docker-php/${{ matrix.php_version }}/alpine${{ env.ALPINE_VERSION }}/cli/Dockerfile
-          sed -ie 's/zlib1g-dev \\/zlib1g-dev ${{ env.DEBIAN_PACKAGES }} \\/g' php/docker-php/${{ matrix.php_version }}/debian/${{ env.DEBIAN_VERSION }}/cli/Dockerfile
+          sed -ie 's/zlib1g-dev \\/zlib1g-dev ${{ env.DEBIAN_PACKAGES }} \\/g' php/docker-php/${{ matrix.php_version }}/${{ env.DEBIAN_VERSION }}/cli/Dockerfile
           sed -ie 's/--enable-option-checking=fatal \\/--enable-option-checking=fatal ${{ env.PHP_EXTENSIONS }} \\ /' php/docker-php/${{ matrix.php_version }}/alpine${{ env.ALPINE_VERSION }}/cli/Dockerfile
           sed -ie 's/--enable-option-checking=fatal \\/--enable-option-checking=fatal ${{ env.PHP_EXTENSIONS }} \\ /' php/docker-php/${{ matrix.php_version }}/${{ env.DEBIAN_VERSION }}/cli/Dockerfile
       
