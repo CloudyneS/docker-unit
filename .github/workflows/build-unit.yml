@@ -44,7 +44,7 @@ jobs:
       - name: Prepare Dockerfiles for Debian
         run: |
           cd nginx-unit/nginx-unit
-          git apply -v ../nginx-unit.patch
+          git apply -v ../debian-dockerfile.patch
           cd ../../
       
       - name: Build Alpine Image
