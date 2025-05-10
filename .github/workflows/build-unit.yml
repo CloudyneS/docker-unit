@@ -4,18 +4,14 @@ on:
   #   branches:
   #     - main
   #   paths:
-  #     - ".github/workflows/build-php.yml"
+  #     - ".github/workflows/php-stack.yml"
 
 env:
-  ALPINE_VERSION: "3.21"
-  DEBIAN_VERSION: "bookworm"
-  ALPINE_PACKAGES: "zlib-dev jpeg-dev freetype-dev libwebp-dev icu-dev libpng-dev libzip-dev mariadb-dev krb5-dev"
-  DEBIAN_PACKAGES: "libjpeg-dev libfreetype6-dev libwebp-dev libicu-dev libpng-dev libzip-dev default-libmysqlclient-dev libkrb5-dev"
-  PHP_EXTENSIONS: "--enable-embed --enable-gd --enable-intl --with-pdo-mysql --with-mysqli --enable-opcache --with-zip --enable-bcmath --with-kerberos --with-imap-ssl --with-freetype --with-jpeg --with-webp"
-
+  #
+  
 
 jobs:
-  build-php-extended:
+  build-php-unit:
     runs-on: ${{ matrix.arch.os }} 
     strategy:
       fail-fast: true
@@ -49,12 +45,10 @@ jobs:
           username: cloudynes
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Prepare Dockerfiles
+      - name: Prepare Dockerfiles for Debian
         run: |
-          sed -ie 's/sqlite-dev \\/sqlite-dev ${{ env.ALPINE_PACKAGES }} \\/g' php/docker-php/${{ matrix.php_version }}/alpine${{ env.ALPINE_VERSION }}/cli/Dockerfile
-          sed -ie 's/zlib1g-dev \\/zlib1g-dev ${{ env.DEBIAN_PACKAGES }} \\/g' php/docker-php/${{ matrix.php_version }}/${{ env.DEBIAN_VERSION }}/cli/Dockerfile
-          sed -ie 's/--enable-option-checking=fatal \\/--enable-option-checking=fatal ${{ env.PHP_EXTENSIONS }} \\ /' php/docker-php/${{ matrix.php_version }}/alpine${{ env.ALPINE_VERSION }}/cli/Dockerfile
-          sed -ie 's/--enable-option-checking=fatal \\/--enable-option-checking=fatal ${{ env.PHP_EXTENSIONS }} \\ /' php/docker-php/${{ matrix.php_version }}/${{ env.DEBIAN_VERSION }}/cli/Dockerfile
+          
+          
       
       - name: Build Alpine Image
         uses: docker/build-push-action@v6
