@@ -6,6 +6,10 @@ on:
     paths:
       - ".github/workflows/build-unit.yml"
 
+permissions:
+  packages: write
+  contents: write
+
 jobs:
   build-php-unit:
     runs-on: ${{ matrix.arch.os }} 
