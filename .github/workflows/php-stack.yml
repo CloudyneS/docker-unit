@@ -1,5 +1,10 @@
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/php-stack.yml"
 
 env:
   ALPINE_VERSION: "3.21"
@@ -10,14 +15,14 @@ env:
 
 jobs:
   build-php-extended:
-    runs-on: ${{ matrix.arch.os }}
+    runs-on: ${{ matrix.arch.os }} 
     strategy:
       fail-fast: true
       matrix:
         arch:
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             arch: amd64
-          - os: ubuntu-latest-arm
+          - os: ubuntu-22.04-arm
             arch: arm64
         php_version:
           - "8.1"
