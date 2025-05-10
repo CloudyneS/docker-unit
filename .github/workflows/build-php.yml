@@ -1,10 +1,10 @@
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - ".github/workflows/php-stack.yml"
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - ".github/workflows/php-stack.yml"
 
 env:
   ALPINE_VERSION: "3.21"
@@ -12,6 +12,7 @@ env:
   ALPINE_PACKAGES: "zlib-dev jpeg-dev freetype-dev libwebp-dev icu-dev libpng-dev libzip-dev mariadb-dev krb5-dev"
   DEBIAN_PACKAGES: "libjpeg-dev libfreetype6-dev libwebp-dev libicu-dev libpng-dev libzip-dev default-libmysqlclient-dev libkrb5-dev"
   PHP_EXTENSIONS: "--enable-embed --enable-gd --enable-intl --with-pdo-mysql --with-mysqli --enable-opcache --with-zip --enable-bcmath --with-kerberos --with-imap-ssl --with-freetype --with-jpeg --with-webp"
+
 
 jobs:
   build-php-extended:
@@ -61,6 +62,8 @@ jobs:
           context: php/docker-php/${{ matrix.php_version }}/alpine${{ env.ALPINE_VERSION }}/cli
           file: php/docker-php/${{ matrix.php_version }}/alpine${{ env.ALPINE_VERSION }}/cli/Dockerfile
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: |
             ghcr.io/cloudynes/php-extended:${{ matrix.php_version }}-alpine-${{ matrix.arch.arch }}
       
@@ -83,7 +86,7 @@ jobs:
           - "8.1"
           - "8.2"
           - "8.3"
-          - "8.4"
+          # - "8.4"
     steps:
       - uses: actions/checkout@v4
 
