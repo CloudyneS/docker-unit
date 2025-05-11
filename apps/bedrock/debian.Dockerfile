@@ -1,5 +1,5 @@
 ARG SOURCE_VERSION=8.2
-FROM golang:1.24.3-alpine AS init-go
+FROM golang:1.24.3-bookworm AS init-go
 
 LABEL Version="1.0"
 LABEL Maintainer="Cloudyne Systems"
@@ -14,7 +14,7 @@ ADD init-go /init-go
 
 RUN go build -o init-go main.go
 
-FROM ghcr.io/cloudynes/php-unit:${SOURCE_VERSION}-alpine
+FROM ghcr.io/cloudynes/php-unit:${SOURCE_VERSION}-debian
 
 USER root
 WORKDIR /app
@@ -31,9 +31,9 @@ COPY --chown=unit:unit ./config.json /docker-entrypoint.d/unit.json
 COPY ./init-go/config-sample.json /init-go/config.json
 COPY ./composer-config.json /etc/composer/config.json
 
-
 RUN docker-php-ext-enable opcache && \
-    apk add --no-cache git zip unzip mariadb-client nano && \
+    apt-get update && \
+    apt-get -y install git zip unzip mariadb-client nano && \
     mv /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini && \
     echo -e "memory_limit = 1G \n" >> /usr/local/etc/php/conf.d/docker-php-memory_limit.ini && \
     sed -i 's/memory_limit = .*/memory_limit = 1G/' /usr/local/etc/php/php.ini && \
@@ -44,6 +44,8 @@ RUN docker-php-ext-enable opcache && \
     chmod +x /usr/local/bin/wp && \
     /usr/local/bin/wp --allow-root package install aaemnnosttv/wp-cli-dotenv-command && \
     chown -R unit:unit /etc/wpcli /etc/composer /app /var/lib/unit /var/run && \
+    apt-get clean && \
+    apt-get autoclean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /usr/share/doc/*
 
 USER unit
@@ -51,7 +53,6 @@ USER unit
 RUN rm -rf /app/* && \
     composer create-project roots/bedrock --no-interaction --no-dev . && \
     cp /app/.env.example /app/.env
-    
 
 USER unit
 
