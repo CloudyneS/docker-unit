@@ -133,7 +133,10 @@ RUN ldconfig / \
         unit \
     && cd /etc/apk/keys && curl -JO https://git.cloudyne.io/api/packages/linux/alpine/key \
     && echo 'https://git.cloudyne.io/api/packages/linux/alpine/all/repository' >> /etc/apk/repositories \
-    && apk add --no-cache bash vvv $(cat /requirements.apk) \
+    && apk add --no-cache bash vvv libxml2-dev $(cat /requirements.apk) \
+    && docker-php-source extract \
+    && docker-php-ext-install -j$(nproc) soap opcache \
+    && docker-php-source delete \
     && rm -f /requirements.apk \
     && ln -sf /dev/stdout /var/log/unit.log \
     && mkdir -p /var/lib/unit /app/web && chown -R unit:unit /var/run /run /var/lib/unit
