@@ -4,8 +4,12 @@ on:
   #   branches:
   #     - main
   #   paths:
-  #     - ".github/workflows/php-stack.yml"
+  #     - ".github/workflows/build-php.yml"
 
+permissions:
+  packages: write
+  contents: write
+  
 env:
   ALPINE_VERSION: "3.21"
   DEBIAN_VERSION: "bookworm"

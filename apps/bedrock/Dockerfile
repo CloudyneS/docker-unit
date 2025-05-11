@@ -1,5 +1,5 @@
-ARG SOURCE_VERSION
-FROM golang:1.18-alpine3.16 as INIT
+ARG SOURCE_VERSION=8.2
+FROM golang:1.24.3-alpine AS init-go
 
 LABEL Version="1.0"
 LABEL Maintainer="Cloudyne Systems"
@@ -26,7 +26,7 @@ ENV WP_CLI_CACHE_DIR="/tmp/wpcli/cache"             \
     COMPOSER_HOME="/etc/composer"
 
 
-COPY --from=INIT --chown=unit:unit /init-go/init-go /init-go/init-go
+COPY --from=init-go --chown=unit:unit /init-go/init-go /init-go/init-go
 COPY --chown=unit:unit ./config.json /docker-entrypoint.d/unit.json
 COPY ./init-go/config-sample.json /init-go/config.json
 COPY ./composer-config.json /etc/composer/config.json
@@ -48,7 +48,8 @@ RUN docker-php-ext-enable opcache && \
 
 USER unit
 
-RUN composer create-project roots/bedrock --no-interaction --no-dev . && \
+RUN rm -rf /app/* && \
+    composer create-project roots/bedrock --no-interaction --no-dev . && \
     cp /app/.env.example /app/.env
     
 

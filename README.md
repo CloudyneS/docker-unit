@@ -1,15 +1,9 @@
 # docker-unit
 Container images with various applications for Nginx Unit
 
-## Base Images
-There are two types of images, alpine and debian. Alpine is the most maintained image, since there are not a lot of viable alternatives to this.
+## Base PHP Image
+Base PHP image with some added extensions and flags for use with Nginx Unit. This image is used as a base for other images. Additional features compared to the base PHP image:
 
-## PHP Versions
-Everything from 8.0 and up is actively maintained up until deprecation, after this it's on an as-needed basis.
-
-## Images
-### PHP Extended
-PHP recompiled with the allow_embed flag and some additional extensions for web:
 - PD
 - Intl
 - PDO
@@ -21,10 +15,9 @@ PHP recompiled with the allow_embed flag and some additional extensions for web:
 - Imap
 - Webp
 
-Dynamically generated based on the official PHP Alpine image, with some added flags to compilation, thus restricted to the same version combinations of PHP/Alpine that are used there.
-
-### PHP Unit
-Nginx Unit on top of the PHP Extended image, based on the official unit container with some additions (e.g. NJS)
+## Base Nginx Unit Image
+This is Nginx Unit built on top of the extended base PHP image (alpine). This image is built for use with PHP and Go applications, and includes NJS.
+The Bookworm image is basically the same as the official unit image, but with the PHP packages above added.
 
 ### PHP Bedrock
 Roots Bedrock installed in /app on the PHP Unit image. Also includes an initializer for some common on-start tasks (DB/File import from URL or path, setting the theme, changing ownership of files, conversion to webp (requires cloudyne-extras plugin))

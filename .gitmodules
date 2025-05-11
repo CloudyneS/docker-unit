@@ -1,3 +1,6 @@
 [submodule "php/docker-php"]
 	path = php/docker-php
 	url = https://github.com/docker-library/php.git
+[submodule "nginx-unit/nginx-unit"]
+	path = nginx-unit/nginx-unit
+	url = https://github.com/nginx/unit.git
