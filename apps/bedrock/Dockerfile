@@ -42,7 +42,7 @@ RUN docker-php-ext-enable opcache && \
     mkdir -p /etc/composer /etc/wpcli/packages && \
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
     curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
-    chmod +x /usr/local/bin/wp && \
+    chmod +x /usr/local/bin/wp /usr/local/bin/docker-entrypoint.sh && \
     /usr/local/bin/wp --allow-root package install aaemnnosttv/wp-cli-dotenv-command && \
     chown -R unit:unit /etc/wpcli /etc/composer /app /var/lib/unit /var/run && \
     rm -rf /var/lib/apt/lists/* /tmp/* /usr/share/doc/*
