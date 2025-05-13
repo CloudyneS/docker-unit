@@ -30,6 +30,7 @@ COPY --from=init-go --chown=unit:unit /init-go/init-go /init-go/init-go
 COPY --chown=unit:unit ./config.json /docker-entrypoint.d/unit.json
 COPY ./init-go/config-sample.json /init-go/config.json
 COPY ./composer-config.json /etc/composer/config.json
+COPY --chown=unit:unit ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 
 RUN docker-php-ext-enable opcache && \
