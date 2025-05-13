@@ -1,4 +1,5 @@
 ARG SOURCE_VERSION=8.2
+FROM golang:1.24.3-alpine AS goget
 FROM ghcr.io/cloudynes/php-extended:${SOURCE_VERSION}-alpine AS builder
 
 LABEL Version="1.0"
@@ -8,7 +9,14 @@ LABEL Description="PHP and Nginx Unit container for Kubernetes deployment"
 LABEL org.opencontainers.image.description="PHP and Nginx Unit container for Kubernetes deployment"
 LABEL org.opencontainers.image.licenses="MIT"
 
-ENV PATH=$PATH:/usr/lib/unit:/usr/src/unit/cargo/bin:
+COPY --from=goget /usr/local/go /usr/local/go
+COPY --from=goget /go /go
+
+ENV GOTOOLCHAIN=local
+ENV GOBIN=/usr/local/go/bin
+ENV GOPATH=/go
+ENV GOLANG_VERSION=1.24.3
+ENV PATH=$PATH:/usr/local/go/bin:/usr/lib/unit:/usr/src/unit/cargo/bin:
 
 # musl/gnu
 ENV RUSTUP_VARIANT="musl"
@@ -78,10 +86,12 @@ RUN set -ex && \
     && make clean \
     && /bin/true \
     && ./configure $CONFIGURE_ARGS_MODULES --cc-opt="$CC_OPT" --modulesdir=/usr/lib/unit/debug-modules --debug \
+    && ./configure go --go-path=${GOPATH} \
     && ./configure php \
     && make -j $NCPU go-install-src libunit-install php-install \
     && make clean \
     && ./configure $CONFIGURE_ARGS_MODULES --cc-opt="$CC_OPT" --modulesdir=/usr/lib/unit/modules \
+    && ./configure go --go-path=${GOPATH} \
     && ./configure php \
     && make -j $NCPU go-install-src libunit-install php-install \
     && cd \
@@ -92,12 +102,20 @@ RUN set -ex && \
 
 ARG SOURCE_VERSION=8.2
 FROM ghcr.io/cloudynes/php-extended:${SOURCE_VERSION}-alpine
-
 COPY docker-entrypoint.sh /usr/local/bin/
 COPY --from=builder /usr/sbin/unitd /usr/sbin/unitd
 COPY --from=builder /usr/sbin/unitd-debug /usr/sbin/unitd-debug
 COPY --from=builder /usr/lib/unit/ /usr/lib/unit/
 COPY --from=builder /requirements.apk /requirements.apk
+
+COPY --from=goget /usr/local/go /usr/local/go
+COPY --from=goget /go /go
+
+ENV GOTOOLCHAIN=local
+ENV GOPATH=/go
+ENV GOLANG_VERSION=1.24.3
+ENV PATH=$PATH:/usr/local/go/bin
+ENV GOCACHE=/tmp
 
 RUN ldconfig / \
     && set -x \
