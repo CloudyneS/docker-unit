@@ -79,11 +79,11 @@ RUN set -ex && \
     && /bin/true \
     && ./configure $CONFIGURE_ARGS_MODULES --cc-opt="$CC_OPT" --modulesdir=/usr/lib/unit/debug-modules --debug \
     && ./configure php \
-    && make -j $NCPU go-install-src libunit-install php-install \
+    && make -j $NCPU php-install \
     && make clean \
     && ./configure $CONFIGURE_ARGS_MODULES --cc-opt="$CC_OPT" --modulesdir=/usr/lib/unit/modules \
     && ./configure php \
-    && make -j $NCPU go-install-src libunit-install php-install \
+    && make -j $NCPU php-install \
     && cd \
     && rm -rf /usr/src/unit \
     && for f in /usr/sbin/unitd /usr/lib/unit/modules/*.unit.so; do \
