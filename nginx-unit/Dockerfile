@@ -16,6 +16,7 @@ ENV RUST_VERSION=1.83.0
 ENV RUSTUP_HOME=/usr/src/unit/rustup
 ENV CARGO_HOME=/usr/src/unit/cargo
 
+ARG NGINX_VERSION=1.32.0-1
 RUN set -ex && \
     apk add --no-cache \
         ca-certificates \
@@ -45,7 +46,7 @@ RUN set -ex && \
     && mkdir -p /usr/lib/unit/modules /usr/lib/unit/debug-modules \
     && mkdir -p /usr/src/unit \
     && cd /usr/src/unit \
-    && git clone --depth 1 -b 1.34.0-1 https://github.com/nginx/unit \
+    && git clone --depth 1 -b ${NGINX_VERSION} https://github.com/nginx/unit \
     && cd unit \
     && NCPU="$(getconf _NPROCESSORS_ONLN)" \
     && DEB_HOST_MULTIARCH="$(dpkg-architecture -q DEB_HOST_MULTIARCH)" \
@@ -64,8 +65,8 @@ RUN set -ex && \
                 --openssl \
                 --libdir=/usr/lib/$DEB_HOST_MULTIARCH" \
     && CONFIGURE_ARGS="$CONFIGURE_ARGS_MODULES \
-                --njs \
-                --otel" \
+                --njs" \
+                # --otel" \
     && make -j $NCPU -C pkg/contrib .njs \
     && export PKG_CONFIG_PATH=$(pwd)/pkg/contrib/njs/build \
     && ./configure $CONFIGURE_ARGS --cc-opt="$CC_OPT" --ld-opt="$LD_OPT" --modulesdir=/usr/lib/unit/debug-modules --debug \
