@@ -1,5 +1,5 @@
 > [!CAUTION]
-> Since Nginx Unit is now discontinued, these images will no longer be updated going forward
+> Since Nginx Unit is now discontinued, these images will no longer be updated going forward. We will be creating new images with FrankenPHP at [github.com/clysec/frankenpress](https://github.com/clysec/frankenpress)
 
 
 # docker-unit
