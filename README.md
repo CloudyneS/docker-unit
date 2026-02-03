@@ -1,3 +1,7 @@
+> [!CAUTION]
+> Since Nginx Unit is now discontinued, these images will no longer be updated going forward
+
+
 # docker-unit
 Container images with various applications for Nginx Unit
 
